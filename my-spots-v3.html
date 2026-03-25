@@ -841,8 +841,27 @@ function exportData() {
 function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
 function handleOverlay(e, id) { if (e.target.id === id) closeOverlay(id); }
 
+// ── Migrate old data ───────────────────────────────────────────────────────
+function migrateSpots() {
+  let changed = false;
+  spots = spots.map(s => {
+    const updated = { ...s };
+    // 舊資料沒有 categories，用舊的 category 欄位轉換
+    if (!updated.categories) {
+      const map = { '餐廳': 'food', '咖啡廳': 'coffee', '民宿': 'stay', '景點': 'scene', '其他': 'other' };
+      updated.categories = updated.category ? [map[updated.category] || 'other'] : ['other'];
+      changed = true;
+    }
+    if (updated.visited === undefined) { updated.visited = false; changed = true; }
+    if (!updated.county) { updated.county = ''; changed = true; }
+    return updated;
+  });
+  if (changed) save();
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 applyTheme();
+migrateSpots();
 checkSetup();
 renderFilters();
 renderMain();
