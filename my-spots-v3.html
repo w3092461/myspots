@@ -214,6 +214,15 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .modal-sm-box { background: var(--bg); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; max-width: 340px; width: 100%; }
 .modal-sm-box h3 { font-size: 16px; font-weight: 500; margin-bottom: 14px; color: var(--text); }
 
+/* Autocomplete dropdown */
+.ac-wrap { position: relative; flex: 1; }
+.ac-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; z-index: 300; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; max-height: 240px; overflow-y: auto; }
+.ac-item { padding: 10px 14px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--border); }
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.focused { background: var(--bg2); }
+.ac-item-main { font-size: 13px; color: var(--text); font-weight: 500; }
+.ac-item-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
 @media (max-width: 480px) {
   .grid { grid-template-columns: 1fr; padding: 12px; }
   .hdr { padding: 13px 16px 11px; }
@@ -284,7 +293,11 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     <div class="field">
       <label>搜尋店名</label>
       <div class="search-row">
-        <input class="input" id="addSearch" type="text" placeholder="例如：三時珈琲 桃園" onkeydown="if(event.key==='Enter')doSearch()" />
+        <div class="ac-wrap">
+          <input class="input" id="addSearch" type="text" placeholder="例如：三時珈琲 桃園" autocomplete="off"
+            oninput="onAcInput()" onkeydown="onAcKey(event)" onblur="setTimeout(hideAc,150)" />
+          <div class="ac-list" id="acList" style="display:none"></div>
+        </div>
         <button class="btn-search" id="addSearchBtn" onclick="doSearch()">搜尋</button>
       </div>
     </div>
@@ -385,7 +398,6 @@ const DEFAULT_CATS = [
   { id: 'coffee', name: '咖啡廳', icon: 'coffee' },
   { id: 'stay', name: '民宿', icon: 'home' },
   { id: 'scene', name: '景點', icon: 'mountain' },
-  { id: 'other', name: '其他', icon: 'pin' },
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -712,6 +724,7 @@ function openAddModal() {
   document.getElementById('addNote').value = '';
   document.getElementById('addCounty').value = '';
   renderAddCats();
+  document.getElementById('acList').style.display = 'none';
   document.getElementById('addOverlay').classList.add('open');
   setTimeout(() => document.getElementById('addSearch').focus(), 300);
 }
@@ -736,6 +749,90 @@ function setAddProgress(pct, msg, isErr) {
   const s = document.getElementById('addStatus');
   s.textContent = msg;
   s.className = 'status' + (isErr ? ' err' : '');
+}
+
+// ── Autocomplete ───────────────────────────────────────────────────────────
+let acTimer = null;
+let acFocusIdx = -1;
+let acSuggestions = [];
+
+function onAcInput() {
+  const q = document.getElementById('addSearch').value.trim();
+  clearTimeout(acTimer);
+  acFocusIdx = -1;
+  if (q.length < 2) { hideAc(); return; }
+  acTimer = setTimeout(() => fetchAc(q), 280);
+}
+
+async function fetchAc(q) {
+  const key = getKey();
+  if (!key) return;
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key },
+      body: JSON.stringify({ input: q, languageCode: 'zh-TW', includedPrimaryTypes: [] })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    // 只取 placePrediction（排除 queryPrediction）
+    acSuggestions = (data.suggestions || []).filter(s => s.placePrediction);
+    renderAc();
+  } catch(e) {}
+}
+
+function renderAc() {
+  const list = document.getElementById('acList');
+  if (!acSuggestions.length) { hideAc(); return; }
+  list.innerHTML = acSuggestions.slice(0, 6).map((s, i) => {
+    const p = s.placePrediction;
+    const main = p?.structuredFormat?.mainText?.text || p?.text?.text || '';
+    const sub = p?.structuredFormat?.secondaryText?.text || '';
+    return `<div class="ac-item" data-idx="${i}" onmousedown="selectAc(${i})">
+      <div class="ac-item-main">${main}</div>
+      ${sub ? `<div class="ac-item-sub">${sub}</div>` : ''}
+    </div>`;
+  }).join('');
+  list.style.display = 'block';
+}
+
+function hideAc() {
+  document.getElementById('acList').style.display = 'none';
+  acSuggestions = [];
+}
+
+function selectAc(i) {
+  const s = acSuggestions[i];
+  if (!s) return;
+  const p = s.placePrediction;
+  const name = p?.structuredFormat?.mainText?.text || p?.text?.text || '';
+  document.getElementById('addSearch').value = name;
+  hideAc();
+  doSearch();
+}
+
+function onAcKey(e) {
+  const list = document.getElementById('acList');
+  const items = list.querySelectorAll('.ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acFocusIdx = Math.min(acFocusIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('focused', i === acFocusIdx));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acFocusIdx = Math.max(acFocusIdx - 1, -1);
+    items.forEach((el, i) => el.classList.toggle('focused', i === acFocusIdx));
+  } else if (e.key === 'Enter') {
+    if (acFocusIdx >= 0 && acSuggestions[acFocusIdx]) {
+      e.preventDefault();
+      selectAc(acFocusIdx);
+    } else {
+      hideAc();
+      doSearch();
+    }
+  } else if (e.key === 'Escape') {
+    hideAc();
+  }
 }
 
 async function doSearch() {
@@ -785,12 +882,20 @@ async function selectSearchResult(i) {
   let photoUrl = null;
   if (place.photos?.length) photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
 
-  // Auto detect county from address
+  // Auto detect county from address (supports both 台 and 臺 variants)
   let county = '';
   const addr = place.formattedAddress || '';
-  const countyList = ['台北市','新北市','桃園市','台中市','台南市','高雄市','基隆市','新竹市','新竹縣','苗栗縣','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','屏東縣','宜蘭縣','花蓮縣','台東縣','澎湖縣','金門縣','連江縣'];
-  county = countyList.find(c => addr.includes(c)) || '';
-  if (!county && !addr.includes('台灣') && addr.length > 0) county = '其他國家';
+  const countyMap = [
+    ['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],
+    ['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],
+    ['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],
+    ['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],
+    ['金門縣'],['連江縣']
+  ];
+  for (const variants of countyMap) {
+    if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
+  }
+  if (!county && !addr.includes('台灣') && !addr.includes('臺灣') && addr.length > 0) county = '其他國家';
 
   setAddProgress(100, '✓ 確認後加入收藏');
   pendingSpot = { id: Date.now().toString(), name: place.displayName?.text || '', address: addr, county, rating: place.rating || null, mapsUrl: place.googleMapsUri || '', photoUrl, createdAt: new Date().toISOString() };
@@ -843,19 +948,52 @@ function handleOverlay(e, id) { if (e.target.id === id) closeOverlay(id); }
 
 // ── Migrate old data ───────────────────────────────────────────────────────
 function migrateSpots() {
+  // 嘗試從舊版 key 讀取資料並合併（v2/v3 → v4）
+  const oldKeys = ['myspots_v3', 'myspots_v2', 'myspots'];
+  for (const key of oldKeys) {
+    const oldRaw = localStorage.getItem(key);
+    if (oldRaw) {
+      try {
+        const oldSpots = JSON.parse(oldRaw);
+        if (Array.isArray(oldSpots) && oldSpots.length > 0) {
+          // 合併：只加入 v4 中不存在的 id
+          const existingIds = new Set(spots.map(s => s.id));
+          const newOnes = oldSpots.filter(s => s.id && !existingIds.has(s.id));
+          if (newOnes.length > 0) spots = [...spots, ...newOnes];
+        }
+      } catch(e) {}
+    }
+  }
+
+  // 欄位正規化
   let changed = false;
+  let catsChanged = false;
   spots = spots.map(s => {
     const updated = { ...s };
     // 舊資料沒有 categories，用舊的 category 欄位轉換
     if (!updated.categories) {
-      const map = { '餐廳': 'food', '咖啡廳': 'coffee', '民宿': 'stay', '景點': 'scene', '其他': 'other' };
-      updated.categories = updated.category ? [map[updated.category] || 'other'] : ['other'];
+      const map = { '餐廳': 'food', '咖啡廳': 'coffee', '民宿': 'stay', '景點': 'scene' };
+      if (updated.category === '其他') {
+        if (!customCats.find(c => c.id === 'other')) {
+          customCats.push({ id: 'other', name: '其他', icon: 'pin' });
+          catsChanged = true;
+        }
+        updated.categories = ['other'];
+      } else {
+        updated.categories = updated.category ? [map[updated.category] || 'food'] : [];
+      }
       changed = true;
     }
+    // 若 categories 裡有 'other' 但自訂分類沒有，自動補上
+    if (updated.categories?.includes('other') && !customCats.find(c => c.id === 'other') && !DEFAULT_CATS.find(c => c.id === 'other')) {
+      customCats.push({ id: 'other', name: '其他', icon: 'pin' });
+      catsChanged = true;
+    }
     if (updated.visited === undefined) { updated.visited = false; changed = true; }
-    if (!updated.county) { updated.county = ''; changed = true; }
+    if (updated.county === undefined) { updated.county = ''; changed = true; }
     return updated;
   });
+  if (catsChanged) saveCats();
   if (changed) save();
 }
 
