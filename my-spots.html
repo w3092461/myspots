@@ -45,6 +45,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .search-bar::placeholder { color: var(--text3); }
 .search-clear { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0; display: none; }
 .search-clear.show { display: block; }
+.sort-sel { background: none; border: none; outline: none; font-size: 11px; color: var(--text3); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; flex-shrink: 0; max-width: 72px; }
 
 /* ── View tabs ── */
 .view-tabs { padding: 10px 16px 0; display: flex; gap: 0; border-bottom: 1px solid var(--border); }
@@ -85,6 +86,8 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .card.visited .card-name { color: var(--text2); }
 .visited-stamp { position: absolute; top: 10px; right: 10px; background: #2ecc71; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 .visited-stamp svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.fav-stamp { position: absolute; top: 10px; left: 10px; background: #e74c3c; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.fav-stamp svg { width: 11px; height: 11px; stroke: #fff; fill: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .card.dragging { opacity: 0.4; transform: scale(0.97); }
 .card.drag-over { border-color: var(--text); border-style: dashed; }
 .card-img { width: 100%; height: 165px; object-fit: cover; display: block; background: var(--bg2); }
@@ -272,6 +275,10 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     <button class="icon-btn" onclick="exportData()" title="匯出資料">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
+    <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="匯入資料">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 8 12 3 17 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </button>
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)" />
     <button class="icon-btn" onclick="openSettings()" title="設定">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -284,6 +291,11 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input class="search-bar" id="searchBar" placeholder="搜尋收藏的地點..." oninput="onSearch()" />
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    <select class="sort-sel" id="sortSel" onchange="setSort(this.value)" title="排序">
+      <option value="manual">手動</option>
+      <option value="newest">最新</option>
+      <option value="oldest">最早</option>
+    </select>
   </div>
 </div>
 
@@ -292,6 +304,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <button class="view-tab on" onclick="setView('all',this)">全部</button>
   <button class="view-tab" onclick="setView('county',this)">縣市</button>
   <button class="view-tab" onclick="setView('visited',this)">已去過</button>
+  <button class="view-tab" onclick="setView('fav',this)">❤ 最愛</button>
 </div>
 
 <!-- Filter bar -->
@@ -403,37 +416,44 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <script>
 // ── SVG Icons ──────────────────────────────────────────────────────────────
 const SVG = {
-  food: `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
-  coffee: `<svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/></svg>`,
-  home: `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-  mountain: `<svg viewBox="0 0 24 24"><polygon points="3 17 9 7 12 11 15 8 21 17"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
-  pin: `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
-  map: `<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
-  check: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
-  edit: `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-  trash: `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
-  link: `<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
-  note: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
-  star: `<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  // 系統用 icons
+  map:      `<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  check:    `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+  edit:     `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash:    `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  link:     `<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  note:     `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+  star:     `<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   download: `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
-  globe: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-  cake: `<svg viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2 1 2 1"/><line x1="2" y1="21" x2="22" y2="21"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>`,
+  globe:    `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  heart:    `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  pin:      `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  // 分類 icons（選擇器用）
+  cutlery:  `<svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><line x1="7" y1="2" x2="7" y2="11"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h1v7"/></svg>`,
+  coffee:   `<svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/></svg>`,
+  home:     `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  mountain: `<svg viewBox="0 0 24 24"><polygon points="3 17 9 7 12 11 15 8 21 17"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
+  pin2:     `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  dog:      `<svg viewBox="0 0 24 24"><path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2 .336-3.5 2.157-3.5 4v3c0 .957.56 1.786 1.353 2.175L5 15l3.5 3 3.5-3-.353-2.825C12.44 11.786 13 10.957 13 10V7c0-1.105-.895-2-2-2z"/><path d="M14 9h2a2 2 0 0 1 2 2v1l2 2v2h-2l-1-1H9"/><path d="M5 14v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2"/><path d="M9 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4"/></svg>`,
+  laptop:   `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`,
   shopping: `<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
-  sun: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
-  music: `<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
-  heart: `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
-  camera: `<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
-  tree: `<svg viewBox="0 0 24 24"><path d="M17 22v-5"/><path d="M7 22v-5"/><path d="M12 2L2 12h3v5h14v-5h3z"/></svg>`,
-  flame: `<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
-  wine: `<svg viewBox="0 0 24 24"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z"/></svg>`,
-  umbrella: `<svg viewBox="0 0 24 24"><polyline points="23 12 1 12"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 2a10 10 0 0 0-10 10"/><path d="M12 2v20"/></svg>`,
+  sun:      `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+  camera:   `<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  cake:     `<svg viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2 1 2 1"/><line x1="2" y1="21" x2="22" y2="21"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>`,
+  wine:     `<svg viewBox="0 0 24 24"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z"/></svg>`,
+  boot:     `<svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M4 20V8l4-4h6l2 3v4h2a2 2 0 0 1 2 2v5"/><path d="M8 20v-6h8v6"/></svg>`,
+  walk:     `<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="1.5"/><path d="M9 8l-2 8"/><path d="M15 8l2 8"/><path d="M9 12h6"/><path d="M7 20l2-4"/><path d="M17 20l-2-4"/></svg>`,
+  flower:   `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2a3 3 0 0 1 3 3c0 1.66-1.34 3-3 3S9 6.66 9 5a3 3 0 0 1 3-3z"/><path d="M12 16a3 3 0 0 1 3 3c0 1.66-1.34 3-3 3s-3-1.34-3-3a3 3 0 0 1 3-3z"/><path d="M2 12a3 3 0 0 1 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3a3 3 0 0 1-3-3z"/><path d="M16 12a3 3 0 0 1 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3a3 3 0 0 1-3-3z"/><path d="M5.64 5.64a3 3 0 0 1 4.24 0c1.17 1.17 1.17 3.07 0 4.24s-3.07 1.17-4.24 0a3 3 0 0 1 0-4.24z"/><path d="M14.12 14.12a3 3 0 0 1 4.24 0c1.17 1.17 1.17 3.07 0 4.24s-3.07 1.17-4.24 0a3 3 0 0 1 0-4.24z"/><path d="M5.64 18.36a3 3 0 0 1 0-4.24c1.17-1.17 3.07-1.17 4.24 0s1.17 3.07 0 4.24a3 3 0 0 1-4.24 0z"/><path d="M14.12 9.88a3 3 0 0 1 0-4.24c1.17-1.17 3.07-1.17 4.24 0s1.17 3.07 0 4.24a3 3 0 0 1-4.24 0z"/></svg>`,
+  cat:      `<svg viewBox="0 0 24 24"><path d="M12 5c-3.87 0-7 3.13-7 7v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4c0-3.87-3.13-7-7-7z"/><path d="M8 5V3l2 2"/><path d="M16 5V3l-2 2"/><line x1="9" y1="14" x2="9.01" y2="14"/><line x1="15" y1="14" x2="15.01" y2="14"/><path d="M9.5 17.5c.83.5 2.17.5 3 0"/></svg>`,
 };
 
 const DEFAULT_CATS = [
-  { id: 'food', name: '餐廳', icon: 'food' },
-  { id: 'coffee', name: '咖啡廳', icon: 'coffee' },
-  { id: 'stay', name: '民宿', icon: 'home' },
-  { id: 'scene', name: '景點', icon: 'mountain' },
+  { id: 'food',        name: '餐廳',   icon: 'cutlery' },
+  { id: 'coffee',      name: '咖啡廳', icon: 'coffee' },
+  { id: 'stay',        name: '民宿',   icon: 'home' },
+  { id: 'scene',       name: '景點',   icon: 'mountain' },
+  { id: 'pet',         name: '寵物友善', icon: 'dog' },
+  { id: 'notimelimit', name: '不限時', icon: 'laptop' },
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -443,6 +463,7 @@ let theme = localStorage.getItem('myspots_theme') || 'light';
 let currentView = 'all';
 let currentFilters = [];
 let countyFilter = '';
+let sortOrder = 'manual';
 let searchQuery = '';
 let pendingSpot = null;
 let dragSrcId = null;
@@ -511,6 +532,7 @@ function toggleFilter(id) {
 function getFilteredSpots() {
   let list = [...spots];
   if (currentView === 'visited') list = list.filter(s => s.visited);
+  if (currentView === 'fav') list = list.filter(s => s.favourited);
   if (currentFilters.length) list = list.filter(s => s.categories?.some(c => currentFilters.includes(c)));
   if (countyFilter) list = list.filter(s => s.county === countyFilter);
   if (searchQuery) {
@@ -522,6 +544,8 @@ function getFilteredSpots() {
       s.note?.toLowerCase().includes(q)
     );
   }
+  if (sortOrder === 'newest') list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  if (sortOrder === 'oldest') list.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
   return list;
 }
 
@@ -601,6 +625,7 @@ function makeCard(s) {
 
   card.innerHTML = `
     ${s.visited ? `<div class="visited-stamp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
+    ${s.favourited ? `<div class="fav-stamp"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>` : ''}
     ${s.photoUrl ? `<img class="card-img" src="${s.photoUrl}" loading="lazy" onerror="this.style.display='none'">` :
       `<div class="card-ph">${SVG.pin.replace('<svg', '<svg width="36" height="36" stroke="var(--text3)" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"')}</div>`}
     <div class="card-body">
@@ -684,7 +709,11 @@ function showCtx(e, id) {
   const menu = document.getElementById('ctxMenu');
   const spot = spots.find(s => s.id === id);
   menu.innerHTML = `
-    <div class="ctx-item" onclick="toggleVisited('${id}')">
+    <div class="ctx-item" onclick="toggleFav('${id}');closeCtx()">
+      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="${spot?.favourited ? 'currentColor' : 'none'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      ${spot?.favourited ? '取消最愛' : '加入最愛'}
+    </div>
+    <div class="ctx-item" onclick="toggleVisited('${id}');closeCtx()">
       ${SVG.check.replace('<svg', '<svg width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')}
       ${spot?.visited ? '取消已去過' : '標記已去過'}
     </div>
@@ -708,6 +737,14 @@ function closeCtx() { document.getElementById('ctxMenu').style.display = 'none';
 function toggleVisited(id) {
   const s = spots.find(x => x.id === id);
   if (s) { s.visited = !s.visited; save(); renderMain(); }
+}
+function toggleFav(id) {
+  const s = spots.find(x => x.id === id);
+  if (s) { s.favourited = !s.favourited; save(); renderMain(); }
+}
+function setSort(val) {
+  sortOrder = val;
+  renderMain();
 }
 function deleteSpot(id) {
   if (!confirm('確定刪除？')) return;
@@ -739,6 +776,10 @@ function openDetail(id) {
 
     <div class="detail-actions">
       ${s.mapsUrl ? `<a class="detail-btn" href="${s.mapsUrl}" target="_blank">${SVG.map.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} Google Maps</a>` : ''}
+      <button class="detail-btn ${s.favourited ? 'visited-on' : ''}" onclick="toggleFav('${id}');openDetail('${id}')">
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="${s.favourited ? 'currentColor' : 'none'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        ${s.favourited ? '已加最愛 ❤' : '加入最愛'}
+      </button>
       <button class="detail-btn ${s.visited ? 'visited-on' : ''}" onclick="toggleVisited('${id}');openDetail('${id}')">
         ${SVG.check.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5"')} ${s.visited ? '已去過 ✓' : '標記已去過'}
       </button>
@@ -983,7 +1024,11 @@ function confirmAdd() {
 }
 
 // ── Custom cat ─────────────────────────────────────────────────────────────
-const ICON_OPTS = ['food','coffee','home','mountain','pin','cake','shopping','sun','music','heart','camera','tree','flame','wine','umbrella','map','star','globe'];
+const ICON_OPTS = [
+  'cutlery','coffee','home','mountain','pin','dog',
+  'laptop','shopping','sun','heart','camera','cake',
+  'wine','boot','walk','flower','cat','globe',
+];
 let selectedIcon = 'pin';
 
 function openCatModal() {
@@ -1019,7 +1064,7 @@ function deleteCustomCat(id) {
   saveCats(); renderFilters(); renderMain();
 }
 
-// ── Export ─────────────────────────────────────────────────────────────────
+// ── Export / Import ────────────────────────────────────────────────────────
 function exportData() {
   const data = JSON.stringify(spots, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -1027,6 +1072,31 @@ function exportData() {
   a.href = URL.createObjectURL(blob);
   a.download = `myspots_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
+}
+
+function handleImport(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      if (!Array.isArray(imported)) throw new Error('格式錯誤');
+      const existingIds = new Set(spots.map(s => s.id));
+      const newOnes = imported.filter(s => s.id && !existingIds.has(s.id));
+      const dupes = imported.length - newOnes.length;
+      spots = [...newOnes, ...spots];
+      save(); renderMain();
+      const msg = newOnes.length > 0
+        ? `✅ 成功匯入 ${newOnes.length} 筆${dupes > 0 ? `，${dupes} 筆已存在略過` : ''}`
+        : `所有資料已存在，無需匯入`;
+      alert(msg);
+    } catch(err) {
+      alert('❌ 匯入失敗：' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ── Overlay ────────────────────────────────────────────────────────────────
