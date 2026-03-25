@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>我的收藏</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Theme ── */
+:root {
+  --bg: #ffffff; --bg2: #f5f5f5; --bg3: #ebebeb;
+  --card: #ffffff; --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.15);
+  --text: #111111; --text2: #555555; --text3: #999999;
+  --accent: #111111; --accent2: #444444;
+  --gold: #111111; --visited: #bbbbbb;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --radius: 12px;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f; --bg2: #1a1a1a; --bg3: #242424;
+  --card: #1a1a1a; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.16);
+  --text: #f0f0f0; --text2: #999999; --text3: #555555;
+  --accent: #ffffff; --accent2: #cccccc;
+  --gold: #ffffff; --visited: #555555;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.2s, color 0.2s; }
+
+/* ── Header ── */
+.hdr { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--bg); position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--text); }
+.logo small { color: var(--text3); font-size: 10px; font-family: 'Noto Sans TC', sans-serif; font-weight: 300; display: block; letter-spacing: 0.15em; }
+.hdr-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg2); color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; flex-shrink: 0; }
+.icon-btn:hover { background: var(--bg3); color: var(--text); }
+.cnt { font-size: 11px; color: var(--text3); letter-spacing: 0.06em; white-space: nowrap; }
+
+/* ── Search bar ── */
+.search-wrap { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.search-inner { display: flex; align-items: center; gap: 8px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 9px 14px; }
+.search-inner svg { flex-shrink: 0; opacity: 0.4; }
+.search-bar { flex: 1; background: none; border: none; outline: none; font-size: 14px; color: var(--text); font-family: 'Noto Sans TC', sans-serif; }
+.search-bar::placeholder { color: var(--text3); }
+.search-clear { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0; display: none; }
+.search-clear.show { display: block; }
+
+/* ── View tabs ── */
+.view-tabs { padding: 10px 16px 0; display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.view-tab { padding: 8px 16px; font-size: 12px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Noto Sans TC', sans-serif; }
+.view-tab.on { color: var(--text); border-bottom-color: var(--text); }
+
+/* ── Filters ── */
+.filter-section { padding: 10px 16px; display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; align-items: center; flex-wrap: nowrap; }
+.filter-section::-webkit-scrollbar { display: none; }
+.ftag { flex-shrink: 0; padding: 5px 13px; border: 1px solid var(--border2); border-radius: 20px; background: transparent; font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+.ftag svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ftag:hover { border-color: var(--text); color: var(--text); }
+.ftag.on { background: var(--text); border-color: var(--text); color: var(--bg); }
+.ftag-add { flex-shrink: 0; padding: 5px 11px; border: 1px dashed var(--border2); border-radius: 20px; background: transparent; font-size: 11px; color: var(--text3); cursor: pointer; white-space: nowrap; }
+.ftag-add:hover { border-color: var(--text); color: var(--text); }
+
+/* ── County view ── */
+.county-section { padding: 16px; }
+.county-group { margin-bottom: 20px; }
+.county-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+.county-count { font-size: 10px; color: var(--text3); font-weight: 300; }
+
+/* ── Card grid ── */
+.grid { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-content: start; }
+
+/* ── Card ── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; cursor: pointer; position: relative; }
+.card:hover { border-color: var(--border2); box-shadow: var(--shadow); transform: translateY(-1px); }
+.card.visited { opacity: 0.65; }
+.card.dragging { opacity: 0.4; transform: scale(0.97); }
+.card.drag-over { border-color: var(--text); border-style: dashed; }
+.card-img { width: 100%; height: 165px; object-fit: cover; display: block; background: var(--bg2); }
+.card-ph { width: 100%; height: 165px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
+.card-ph svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.card-body { padding: 14px; }
+.card-top { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
+.card-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.3; flex: 1; }
+.card-visited-badge { flex-shrink: 0; margin-top: 2px; }
+.card-visited-badge svg { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
+.card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
+.card-cat-tag { font-size: 10px; color: var(--text3); border: 1px solid var(--border2); border-radius: 10px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
+.card-cat-tag svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.card-addr { font-size: 11px; color: var(--text2); font-weight: 300; line-height: 1.5; margin-bottom: 10px; }
+.card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text2); font-size: 10px; text-decoration: none; transition: all 0.15s; }
+.map-btn:hover { border-color: var(--text); color: var(--text); }
+.map-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.rating { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 3px; }
+.card-menu { margin-left: auto; background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 2px 4px; opacity: 0.5; }
+.card-menu:hover { opacity: 1; }
+
+/* ── Empty ── */
+.empty { grid-column: 1/-1; text-align: center; padding: 72px 20px; }
+.empty svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1; margin-bottom: 16px; stroke-linecap: round; stroke-linejoin: round; }
+.empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text2); margin-bottom: 8px; }
+.empty-sub { font-size: 12px; color: var(--text3); line-height: 1.8; }
+
+/* ── FAB ── */
+.fab { position: fixed; bottom: 26px; right: 22px; width: 52px; height: 52px; border-radius: 50%; background: var(--text); color: var(--bg); border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 50; transition: transform 0.2s; }
+.fab:hover { transform: scale(1.08); }
+.fab:active { transform: scale(0.95); }
+
+/* ── Overlay / Sheet ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.sheet { background: var(--bg); border: 1px solid var(--border2); border-radius: 22px 22px 0 0; width: 100%; max-width: 560px; padding: 24px 22px 44px; transform: translateY(30px); transition: transform 0.28s cubic-bezier(0.34,1.3,0.64,1); max-height: 92vh; overflow-y: auto; }
+.overlay.open .sheet { transform: translateY(0); }
+.handle { width: 34px; height: 3px; background: var(--border2); border-radius: 2px; margin: 0 auto 20px; }
+.sheet-title { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--text); margin-bottom: 4px; }
+.sheet-sub { font-size: 12px; color: var(--text3); margin-bottom: 18px; line-height: 1.6; }
+
+/* ── Form elements ── */
+.field { margin-bottom: 12px; }
+.field label { font-size: 10px; letter-spacing: 0.1em; color: var(--text3); display: block; margin-bottom: 5px; text-transform: uppercase; }
+.input { width: 100%; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 9px; color: var(--text); font-size: 13px; outline: none; font-family: 'Noto Sans TC', sans-serif; transition: border-color 0.2s; }
+.input:focus { border-color: var(--text); }
+.input::placeholder { color: var(--text3); }
+textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
+.search-row { display: flex; gap: 8px; }
+.search-row .input { flex: 1; }
+.btn-search { padding: 12px 16px; background: var(--text); color: var(--bg); border: none; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
+.btn-search:hover { opacity: 0.8; }
+.btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Cat multi-select in form */
+.cat-picks { display: flex; gap: 5px; flex-wrap: wrap; }
+.cat-pick { padding: 5px 12px; border: 1px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 4px; }
+.cat-pick svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.cat-pick.on { background: var(--text); border-color: var(--text); color: var(--bg); }
+
+/* Progress */
+.prog { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; margin-bottom: 8px; }
+.prog-fill { height: 100%; background: var(--text); border-radius: 1px; transition: width 0.4s ease; }
+.status { font-size: 11px; color: var(--text2); text-align: center; min-height: 16px; margin-bottom: 10px; }
+.status.err { color: #e05555; }
+
+/* Results */
+.results-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.result-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; cursor: pointer; transition: border-color 0.15s; }
+.result-item:hover, .result-item.on { border-color: var(--text); }
+.result-item-info { flex: 1; min-width: 0; }
+.result-item-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.result-item-addr { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.result-item-rating { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* Selected preview */
+.result-box { display: flex; gap: 12px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.result-thumb { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--bg3); }
+.result-thumb-ph { width: 64px; height: 64px; border-radius: 8px; flex-shrink: 0; background: var(--bg3); display: flex; align-items: center; justify-content: center; }
+.result-thumb-ph svg { width: 24px; height: 24px; stroke: var(--text3); fill: none; stroke-width: 1.2; }
+.result-info { flex: 1; min-width: 0; }
+.result-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.result-addr { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.result-rating { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+/* Hint */
+.hint { font-size: 11px; color: var(--text3); padding: 8px 12px; background: var(--bg2); border-radius: 7px; margin-bottom: 12px; line-height: 1.6; }
+
+/* Actions */
+.actions { display: flex; gap: 8px; margin-top: 4px; }
+.btn-main { flex: 1; padding: 13px; background: var(--text); color: var(--bg); border: none; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
+.btn-main:hover { opacity: 0.85; }
+.btn-main:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-sec { padding: 13px 18px; background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 9px; font-size: 13px; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; }
+
+/* Detail sheet */
+.detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; background: var(--bg2); }
+.detail-ph { width: 100%; height: 200px; background: var(--bg2); border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+.detail-ph svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1; }
+.detail-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.detail-cats { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.detail-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; font-size: 13px; color: var(--text2); line-height: 1.6; }
+.detail-row svg { width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 1.5; flex-shrink: 0; margin-top: 2px; stroke-linecap: round; stroke-linejoin: round; }
+.detail-row a { color: var(--text); text-decoration: underline; word-break: break-all; }
+.detail-note { background: var(--bg2); border-radius: 8px; padding: 12px; font-size: 13px; color: var(--text2); line-height: 1.7; font-style: italic; margin-bottom: 10px; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.detail-btn { flex: 1; min-width: 120px; padding: 11px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 9px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.detail-btn:hover { border-color: var(--text); color: var(--text); }
+.detail-btn.danger:hover { border-color: #e05555; color: #e05555; }
+.detail-btn.visited-on { background: var(--text); color: var(--bg); border-color: var(--text); }
+.detail-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Edit form in detail */
+.edit-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* Setup */
+.setup-wrap { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.setup-box { max-width: 400px; width: 100%; }
+.setup-box h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); margin-bottom: 8px; }
+.setup-box p { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
+.setup-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 14px; line-height: 1.6; }
+
+/* Context menu */
+.ctx-menu { position: fixed; background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; z-index: 400; box-shadow: 0 8px 30px rgba(0,0,0,0.15); min-width: 150px; }
+.ctx-item { padding: 10px 14px; font-size: 13px; color: var(--text2); cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+.ctx-item:hover { background: var(--bg2); color: var(--text); }
+.ctx-item.danger:hover { color: #e05555; }
+.ctx-item svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; width: 11px; height: 11px; border: 1.5px solid var(--border2); border-top-color: var(--text); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
+
+/* Custom cat modal */
+.modal-sm { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-sm-box { background: var(--bg); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; max-width: 340px; width: 100%; }
+.modal-sm-box h3 { font-size: 16px; font-weight: 500; margin-bottom: 14px; color: var(--text); }
+
+@media (max-width: 480px) {
+  .grid { grid-template-columns: 1fr; padding: 12px; }
+  .hdr { padding: 13px 16px 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Setup -->
+<div class="setup-wrap" id="setupWrap" style="display:none">
+  <div class="setup-box">
+    <h2>我的收藏</h2>
+    <p>填入 Google Places API Key 開始使用。用於搜尋店家地址、評分與照片，Key 只存在你的瀏覽器。</p>
+    <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:6px;text-transform:uppercase">Google Places API Key</label>
+    <input class="input" type="password" id="keyInput" placeholder="AIza..." style="margin-bottom:12px" />
+    <button class="btn-main" style="width:100%" onclick="saveKey()">開始使用</button>
+    <div class="setup-note">個人使用每月免費 10,000 次</div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo">我的收藏 <small>MY SPOTS</small></div>
+  <div class="hdr-actions">
+    <span class="cnt" id="cnt"></span>
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題" id="themeBtn">☀</button>
+    <button class="icon-btn" onclick="exportData()" title="匯出資料">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="icon-btn" onclick="openSettings()" title="設定">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Search -->
+<div class="search-wrap">
+  <div class="search-inner">
+    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="searchBar" placeholder="搜尋收藏的地點..." oninput="onSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+</div>
+
+<!-- View tabs -->
+<div class="view-tabs">
+  <button class="view-tab on" onclick="setView('all',this)">全部</button>
+  <button class="view-tab" onclick="setView('county',this)">縣市</button>
+  <button class="view-tab" onclick="setView('visited',this)">已去過</button>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-section" id="filterSection"></div>
+
+<!-- Main content -->
+<div id="mainContent"></div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()">＋</button>
+
+<!-- Add Modal -->
+<div class="overlay" id="addOverlay" onclick="handleOverlay(event,'addOverlay')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title">新增收藏地點</div>
+    <div class="sheet-sub">輸入店名搜尋，或直接手動填寫。</div>
+
+    <div class="field">
+      <label>搜尋店名</label>
+      <div class="search-row">
+        <input class="input" id="addSearch" type="text" placeholder="例如：三時珈琲 桃園" onkeydown="if(event.key==='Enter')doSearch()" />
+        <button class="btn-search" id="addSearchBtn" onclick="doSearch()">搜尋</button>
+      </div>
+    </div>
+    <div class="hint">💡 加上城市更精準，例如「% Arabica 台北」</div>
+
+    <div class="prog" id="addProg" style="display:none"><div class="prog-fill" id="addProgFill" style="width:0%"></div></div>
+    <div class="status" id="addStatus"></div>
+    <div class="results-list" id="addResults"></div>
+
+    <div class="result-box" id="addPreview" style="display:none">
+      <div id="addThumbWrap"></div>
+      <div class="result-info">
+        <div class="result-name" id="addPreviewName"></div>
+        <div class="result-addr" id="addPreviewAddr"></div>
+        <div class="result-rating" id="addPreviewRating"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>分類（可多選）</label>
+      <div class="cat-picks" id="addCatPicks"></div>
+    </div>
+
+    <div class="field">
+      <label>縣市</label>
+      <select class="input" id="addCounty">
+        <option value="">自動偵測 / 不指定</option>
+        <option>台北市</option><option>新北市</option><option>桃園市</option>
+        <option>台中市</option><option>台南市</option><option>高雄市</option>
+        <option>基隆市</option><option>新竹市</option><option>新竹縣</option>
+        <option>苗栗縣</option><option>彰化縣</option><option>南投縣</option>
+        <option>雲林縣</option><option>嘉義市</option><option>嘉義縣</option>
+        <option>屏東縣</option><option>宜蘭縣</option><option>花蓮縣</option>
+        <option>台東縣</option><option>澎湖縣</option><option>金門縣</option>
+        <option>連江縣</option><option>日本</option><option>韓國</option>
+        <option>其他國家</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>IG / Threads 貼文連結（選填）</label>
+      <input class="input" id="addLink" type="url" placeholder="https://www.threads.net/..." />
+    </div>
+
+    <div class="field">
+      <label>備注（選填）</label>
+      <textarea class="input" id="addNote" placeholder="推薦理由、必點餐點、注意事項..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn-sec" onclick="closeOverlay('addOverlay')">取消</button>
+      <button class="btn-main" id="addBtn" onclick="confirmAdd()" disabled>加入收藏</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="overlay" id="detailOverlay" onclick="handleOverlay(event,'detailOverlay')">
+  <div class="sheet" id="detailSheet"></div>
+</div>
+
+<!-- Context menu -->
+<div class="ctx-menu" id="ctxMenu" style="display:none"></div>
+
+<!-- Custom cat modal -->
+<div class="modal-sm" id="catModal" style="display:none">
+  <div class="modal-sm-box">
+    <h3>新增自訂分類</h3>
+    <input class="input" id="catModalInput" placeholder="例如：夜市、甜點、海鮮..." style="margin-bottom:12px" onkeydown="if(event.key==='Enter')saveCustomCat()" />
+    <div class="actions">
+      <button class="btn-sec" onclick="document.getElementById('catModal').style.display='none'">取消</button>
+      <button class="btn-main" onclick="saveCustomCat()">新增</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SVG Icons ──────────────────────────────────────────────────────────────
+const SVG = {
+  food: `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
+  coffee: `<svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/></svg>`,
+  home: `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  mountain: `<svg viewBox="0 0 24 24"><polygon points="3 17 9 7 12 11 15 8 21 17"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
+  pin: `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  map: `<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  check: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  link: `<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  note: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+  star: `<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  download: `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  globe: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+};
+
+const DEFAULT_CATS = [
+  { id: 'food', name: '餐廳', icon: 'food' },
+  { id: 'coffee', name: '咖啡廳', icon: 'coffee' },
+  { id: 'stay', name: '民宿', icon: 'home' },
+  { id: 'scene', name: '景點', icon: 'mountain' },
+  { id: 'other', name: '其他', icon: 'pin' },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let spots = JSON.parse(localStorage.getItem('myspots_v4') || '[]');
+let customCats = JSON.parse(localStorage.getItem('myspots_cats') || '[]');
+let theme = localStorage.getItem('myspots_theme') || 'light';
+let currentView = 'all';
+let currentFilters = [];
+let searchQuery = '';
+let pendingSpot = null;
+let dragSrcId = null;
+let editingSpotId = null;
+let addSelectedCats = [];
+
+function allCats() { return [...DEFAULT_CATS, ...customCats]; }
+function save() { localStorage.setItem('myspots_v4', JSON.stringify(spots)); }
+function saveCats() { localStorage.setItem('myspots_cats', JSON.stringify(customCats)); }
+function getKey() { return localStorage.getItem('gplaceskey') || ''; }
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = theme === 'dark' ? '☀' : '🌙';
+  localStorage.setItem('myspots_theme', theme);
+}
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+}
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+function checkSetup() {
+  document.getElementById('setupWrap').style.display = getKey() ? 'none' : 'flex';
+}
+function saveKey() {
+  const k = document.getElementById('keyInput').value.trim();
+  if (!k) return;
+  localStorage.setItem('gplaceskey', k);
+  document.getElementById('setupWrap').style.display = 'none';
+}
+function openSettings() {
+  document.getElementById('keyInput').value = getKey();
+  document.getElementById('setupWrap').style.display = 'flex';
+}
+
+// ── Cat icon SVG ───────────────────────────────────────────────────────────
+function catIconSVG(cat, size = 13) {
+  const icon = SVG[cat.icon] || SVG.pin;
+  return icon.replace('<svg', `<svg width="${size}" height="${size}" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"`);
+}
+
+// ── Filter bar ─────────────────────────────────────────────────────────────
+function renderFilters() {
+  const sec = document.getElementById('filterSection');
+  const cats = allCats();
+  sec.innerHTML = cats.map(c => `
+    <button class="ftag ${currentFilters.includes(c.id) ? 'on' : ''}" onclick="toggleFilter('${c.id}')">
+      ${catIconSVG(c)} ${c.name}
+    </button>`).join('') +
+    `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>`;
+}
+
+function toggleFilter(id) {
+  if (currentFilters.includes(id)) currentFilters = currentFilters.filter(f => f !== id);
+  else currentFilters.push(id);
+  renderFilters();
+  renderMain();
+}
+
+// ── Main render ────────────────────────────────────────────────────────────
+function getFilteredSpots() {
+  let list = [...spots];
+  if (currentView === 'visited') list = list.filter(s => s.visited);
+  if (currentFilters.length) list = list.filter(s => s.categories?.some(c => currentFilters.includes(c)));
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(s =>
+      s.name?.toLowerCase().includes(q) ||
+      s.address?.toLowerCase().includes(q) ||
+      s.county?.toLowerCase().includes(q) ||
+      s.note?.toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function renderMain() {
+  const content = document.getElementById('mainContent');
+  document.getElementById('cnt').textContent = spots.length + ' 個地點';
+
+  if (currentView === 'county') {
+    renderCountyView(content);
+  } else {
+    content.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    const list = getFilteredSpots();
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty">
+        ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
+        <div class="empty-title">${spots.length === 0 ? '還沒有收藏' : '沒有符合的地點'}</div>
+        <div class="empty-sub">${spots.length === 0 ? '點右下角 ＋ 開始收藏吧！' : ''}</div>
+      </div>`;
+    } else {
+      list.forEach(s => grid.appendChild(makeCard(s)));
+    }
+    content.appendChild(grid);
+  }
+}
+
+function renderCountyView(content) {
+  const list = getFilteredSpots();
+  const groups = {};
+  list.forEach(s => {
+    const key = s.county || '未分縣市';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  content.innerHTML = '';
+  if (!Object.keys(groups).length) {
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.innerHTML = `<div class="empty">
+      ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
+      <div class="empty-title">沒有符合的地點</div>
+    </div>`;
+    content.appendChild(grid);
+    return;
+  }
+
+  const sec = document.createElement('div');
+  sec.className = 'county-section';
+  Object.entries(groups).sort().forEach(([county, items]) => {
+    const group = document.createElement('div');
+    group.className = 'county-group';
+    group.innerHTML = `<div class="county-title">${county} <span class="county-count">${items.length} 個地點</span></div>`;
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.style.padding = '0';
+    grid.style.marginTop = '8px';
+    items.forEach(s => grid.appendChild(makeCard(s)));
+    group.appendChild(grid);
+    sec.appendChild(group);
+  });
+  content.appendChild(sec);
+}
+
+function makeCard(s) {
+  const card = document.createElement('div');
+  card.className = 'card' + (s.visited ? ' visited' : '');
+  card.dataset.id = s.id;
+  card.draggable = true;
+
+  const cats = (s.categories || []).map(cid => {
+    const cat = allCats().find(c => c.id === cid);
+    return cat ? `<span class="card-cat-tag">${catIconSVG(cat, 10)} ${cat.name}</span>` : '';
+  }).join('');
+
+  card.innerHTML = `
+    ${s.photoUrl ? `<img class="card-img" src="${s.photoUrl}" loading="lazy" onerror="this.style.display='none'">` :
+      `<div class="card-ph">${SVG.pin.replace('<svg', '<svg width="36" height="36" stroke="var(--text3)" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"')}</div>`}
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name">${s.name}</div>
+        ${s.visited ? `<div class="card-visited-badge">${SVG.check.replace('<svg', '<svg width="16" height="16" stroke="var(--text3)" fill="none" stroke-width="1.5"')}</div>` : ''}
+      </div>
+      ${cats ? `<div class="card-cats">${cats}</div>` : ''}
+      ${s.address ? `<div class="card-addr">${s.address}</div>` : ''}
+      ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
+      <div class="card-foot">
+        ${s.mapsUrl ? `<a class="map-btn" href="${s.mapsUrl}" target="_blank" onclick="event.stopPropagation()">
+          ${SVG.pin.replace('<svg', '<svg width="11" height="11" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} Google Maps
+        </a>` : ''}
+        ${s.rating ? `<span class="rating">${SVG.star.replace('<svg', '<svg width="11" height="11" stroke="currentColor" fill="currentColor" stroke-width="1.5"')} ${s.rating}</span>` : ''}
+        <button class="card-menu" onclick="event.stopPropagation();showCtx(event,'${s.id}')">⋯</button>
+      </div>
+    </div>`;
+
+  card.onclick = () => openDetail(s.id);
+  card.addEventListener('dragstart', e => { dragSrcId = s.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+  card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+  card.addEventListener('drop', e => {
+    e.preventDefault(); card.classList.remove('drag-over');
+    if (dragSrcId && dragSrcId !== s.id) {
+      const from = spots.findIndex(x => x.id === dragSrcId);
+      const to = spots.findIndex(x => x.id === s.id);
+      if (from !== -1 && to !== -1) {
+        const [item] = spots.splice(from, 1);
+        spots.splice(to, 0, item);
+        save(); renderMain();
+      }
+    }
+  });
+  return card;
+}
+
+// ── View / Search ──────────────────────────────────────────────────────────
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMain();
+}
+
+function onSearch() {
+  searchQuery = document.getElementById('searchBar').value;
+  document.getElementById('searchClear').classList.toggle('show', searchQuery.length > 0);
+  renderMain();
+}
+
+function clearSearch() {
+  document.getElementById('searchBar').value = '';
+  searchQuery = '';
+  document.getElementById('searchClear').classList.remove('show');
+  renderMain();
+}
+
+// ── Context menu ───────────────────────────────────────────────────────────
+function showCtx(e, id) {
+  const menu = document.getElementById('ctxMenu');
+  const spot = spots.find(s => s.id === id);
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="toggleVisited('${id}')">
+      ${SVG.check.replace('<svg', '<svg width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')}
+      ${spot?.visited ? '取消已去過' : '標記已去過'}
+    </div>
+    <div class="ctx-item" onclick="openDetail('${id}');closeCtx()">
+      ${SVG.edit.replace('<svg', '<svg width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')}
+      編輯
+    </div>
+    <div class="ctx-item danger" onclick="deleteSpot('${id}');closeCtx()">
+      ${SVG.trash.replace('<svg', '<svg width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')}
+      刪除
+    </div>`;
+  menu.style.display = 'block';
+  const x = Math.min(e.clientX, window.innerWidth - 170);
+  const y = Math.min(e.clientY, window.innerHeight - 140);
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  setTimeout(() => document.addEventListener('click', closeCtx, { once: true }), 10);
+}
+function closeCtx() { document.getElementById('ctxMenu').style.display = 'none'; }
+
+function toggleVisited(id) {
+  const s = spots.find(x => x.id === id);
+  if (s) { s.visited = !s.visited; save(); renderMain(); }
+}
+function deleteSpot(id) {
+  if (!confirm('確定刪除？')) return;
+  spots = spots.filter(s => s.id !== id);
+  save(); renderMain();
+}
+
+// ── Detail ─────────────────────────────────────────────────────────────────
+function openDetail(id) {
+  const s = spots.find(x => x.id === id);
+  if (!s) return;
+  editingSpotId = id;
+  const cats = (s.categories || []).map(cid => {
+    const cat = allCats().find(c => c.id === cid);
+    return cat ? `<span class="card-cat-tag">${catIconSVG(cat, 11)} ${cat.name}</span>` : '';
+  }).join('');
+
+  document.getElementById('detailSheet').innerHTML = `
+    <div class="handle"></div>
+    ${s.photoUrl ? `<img class="detail-img" src="${s.photoUrl}" onerror="this.style.display='none'">` :
+      `<div class="detail-ph">${SVG.pin.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1"')}</div>`}
+    <div class="detail-title">${s.name}</div>
+    ${cats ? `<div class="detail-cats">${cats}</div>` : ''}
+    ${s.address ? `<div class="detail-row">${SVG.pin.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.address}</span></div>` : ''}
+    ${s.county ? `<div class="detail-row">${SVG.globe.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.county}</span></div>` : ''}
+    ${s.rating ? `<div class="detail-row">${SVG.star.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="currentColor" stroke-width="1.5"')} <span>${s.rating} 分</span></div>` : ''}
+    ${s.sourceUrl ? `<div class="detail-row">${SVG.link.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <a href="${s.sourceUrl}" target="_blank">查看原始貼文</a></div>` : ''}
+    ${s.note ? `<div class="detail-note">${s.note}</div>` : ''}
+
+    <div class="detail-actions">
+      ${s.mapsUrl ? `<a class="detail-btn" href="${s.mapsUrl}" target="_blank">${SVG.map.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} Google Maps</a>` : ''}
+      <button class="detail-btn ${s.visited ? 'visited-on' : ''}" onclick="toggleVisited('${id}');openDetail('${id}')">
+        ${SVG.check.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5"')} ${s.visited ? '已去過 ✓' : '標記已去過'}
+      </button>
+    </div>
+
+    <div class="edit-section">
+      <div class="field"><label>備注</label>
+        <textarea class="input" id="editNote" placeholder="推薦理由、必點、注意事項...">${s.note || ''}</textarea>
+      </div>
+      <div class="field"><label>貼文連結</label>
+        <input class="input" id="editLink" type="url" placeholder="https://..." value="${s.sourceUrl || ''}" />
+      </div>
+      <div class="actions">
+        <button class="detail-btn danger" onclick="deleteSpot('${id}');closeOverlay('detailOverlay')" style="flex:0.5">
+          ${SVG.trash.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} 刪除
+        </button>
+        <button class="btn-main" onclick="saveDetail('${id}')">儲存</button>
+      </div>
+    </div>`;
+
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function saveDetail(id) {
+  const s = spots.find(x => x.id === id);
+  if (!s) return;
+  s.note = document.getElementById('editNote').value.trim();
+  s.sourceUrl = document.getElementById('editLink').value.trim();
+  save(); renderMain();
+  closeOverlay('detailOverlay');
+}
+
+// ── Add Modal ──────────────────────────────────────────────────────────────
+function openAddModal() {
+  pendingSpot = null;
+  addSelectedCats = ['food'];
+  document.getElementById('addSearch').value = '';
+  document.getElementById('addResults').innerHTML = '';
+  document.getElementById('addPreview').style.display = 'none';
+  document.getElementById('addProg').style.display = 'none';
+  document.getElementById('addStatus').textContent = '';
+  document.getElementById('addBtn').disabled = true;
+  document.getElementById('addLink').value = '';
+  document.getElementById('addNote').value = '';
+  document.getElementById('addCounty').value = '';
+  renderAddCats();
+  document.getElementById('addOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('addSearch').focus(), 300);
+}
+
+function renderAddCats() {
+  const wrap = document.getElementById('addCatPicks');
+  wrap.innerHTML = allCats().map(c => `
+    <button class="cat-pick ${addSelectedCats.includes(c.id) ? 'on' : ''}" onclick="toggleAddCat('${c.id}')">
+      ${catIconSVG(c, 12)} ${c.name}
+    </button>`).join('');
+}
+
+function toggleAddCat(id) {
+  if (addSelectedCats.includes(id)) addSelectedCats = addSelectedCats.filter(x => x !== id);
+  else addSelectedCats.push(id);
+  renderAddCats();
+}
+
+function setAddProgress(pct, msg, isErr) {
+  document.getElementById('addProg').style.display = pct > 0 ? 'block' : 'none';
+  document.getElementById('addProgFill').style.width = pct + '%';
+  const s = document.getElementById('addStatus');
+  s.textContent = msg;
+  s.className = 'status' + (isErr ? ' err' : '');
+}
+
+async function doSearch() {
+  const q = document.getElementById('addSearch').value.trim();
+  if (!q) { setAddProgress(0, '請輸入店名', true); return; }
+  const key = getKey();
+  if (!key) { openSettings(); return; }
+  document.getElementById('addSearchBtn').disabled = true;
+  document.getElementById('addResults').innerHTML = '';
+  document.getElementById('addPreview').style.display = 'none';
+  document.getElementById('addBtn').disabled = true;
+  pendingSpot = null;
+  setAddProgress(30, '🔍 搜尋中...');
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id' },
+      body: JSON.stringify({ textQuery: q, languageCode: 'zh-TW', pageSize: 5 })
+    });
+    if (!res.ok) throw new Error((await res.json()).error?.message || 'API 錯誤');
+    const data = await res.json();
+    const places = data.places || [];
+    if (!places.length) { setAddProgress(0, `找不到「${q}」，試試加上城市名`, true); return; }
+    setAddProgress(100, `找到 ${places.length} 個結果，請選擇`);
+    window._searchResults = places;
+    document.getElementById('addResults').innerHTML = places.map((p, i) => `
+      <div class="result-item" onclick="selectSearchResult(${i})" data-idx="${i}">
+        <div class="result-item-info">
+          <div class="result-item-name">${p.displayName?.text || ''}</div>
+          <div class="result-item-addr">${p.formattedAddress || ''}</div>
+          ${p.rating ? `<div class="result-item-rating">★ ${p.rating}</div>` : ''}
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    setAddProgress(0, '⚠ ' + e.message, true);
+  } finally {
+    document.getElementById('addSearchBtn').disabled = false;
+  }
+}
+
+async function selectSearchResult(i) {
+  const place = window._searchResults?.[i];
+  if (!place) return;
+  const key = getKey();
+  document.querySelectorAll('.result-item').forEach((el, idx) => el.classList.toggle('on', idx === i));
+  setAddProgress(80, '📸 取得照片...');
+  let photoUrl = null;
+  if (place.photos?.length) photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
+
+  // Auto detect county from address
+  let county = '';
+  const addr = place.formattedAddress || '';
+  const countyList = ['台北市','新北市','桃園市','台中市','台南市','高雄市','基隆市','新竹市','新竹縣','苗栗縣','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','屏東縣','宜蘭縣','花蓮縣','台東縣','澎湖縣','金門縣','連江縣'];
+  county = countyList.find(c => addr.includes(c)) || '';
+  if (!county && !addr.includes('台灣') && addr.length > 0) county = '其他國家';
+
+  setAddProgress(100, '✓ 確認後加入收藏');
+  pendingSpot = { id: Date.now().toString(), name: place.displayName?.text || '', address: addr, county, rating: place.rating || null, mapsUrl: place.googleMapsUri || '', photoUrl, createdAt: new Date().toISOString() };
+
+  const tw = document.getElementById('addThumbWrap');
+  tw.innerHTML = photoUrl ? `<img class="result-thumb" src="${photoUrl}" onerror="this.style.display='none'">` :
+    `<div class="result-thumb-ph">${SVG.pin.replace('<svg', '<svg width="24" height="24" stroke="var(--text3)" fill="none" stroke-width="1.2"')}</div>`;
+  document.getElementById('addPreviewName').textContent = pendingSpot.name;
+  document.getElementById('addPreviewAddr').textContent = pendingSpot.address;
+  document.getElementById('addPreviewRating').textContent = pendingSpot.rating ? `★ ${pendingSpot.rating}` : '';
+  document.getElementById('addPreview').style.display = 'flex';
+  document.getElementById('addBtn').disabled = false;
+
+  // Set county dropdown
+  if (county) document.getElementById('addCounty').value = county;
+}
+
+function confirmAdd() {
+  if (!pendingSpot) return;
+  const county = document.getElementById('addCounty').value || pendingSpot.county || '';
+  spots.unshift({ ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false });
+  save(); renderMain();
+  closeOverlay('addOverlay');
+}
+
+// ── Custom cat ─────────────────────────────────────────────────────────────
+function openCatModal() { document.getElementById('catModal').style.display = 'flex'; document.getElementById('catModalInput').value = ''; setTimeout(() => document.getElementById('catModalInput').focus(), 100); }
+function saveCustomCat() {
+  const name = document.getElementById('catModalInput').value.trim();
+  if (!name) return;
+  const id = 'custom_' + Date.now();
+  customCats.push({ id, name, icon: 'pin' });
+  saveCats(); renderFilters(); renderAddCats();
+  document.getElementById('catModal').style.display = 'none';
+}
+
+// ── Export ─────────────────────────────────────────────────────────────────
+function exportData() {
+  const data = JSON.stringify(spots, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `myspots_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ── Overlay ────────────────────────────────────────────────────────────────
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function handleOverlay(e, id) { if (e.target.id === id) closeOverlay(id); }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+applyTheme();
+checkSetup();
+renderFilters();
+renderMain();
+</script>
+</body>
+</html>
