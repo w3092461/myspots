@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>我的收藏地圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e0c; --bg2: #181714; --bg3: #211f1b;
+  --card: #1e1c18; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --gold: #c9a84c; --gold2: #e8c97a; --text: #f0ebe0;
+  --text2: #a09880; --text3: #6a6050; --accent: #d4774a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Header */
+header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--bg); position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--gold); }
+.logo small { color: var(--text3); font-size: 10px; font-family: 'Noto Sans TC', sans-serif; font-weight: 300; display: block; margin-top: 2px; letter-spacing: 0.15em; }
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.cnt { font-size: 11px; color: var(--text3); letter-spacing: 0.08em; }
+.gear { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+.gear:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Setup */
+.setup-wrap { position: fixed; inset: 0; background: rgba(10,9,8,0.97); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.setup-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 18px; padding: 36px 30px; max-width: 400px; width: 100%; }
+.setup-box h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
+.setup-box p { font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 22px; }
+.setup-label { font-size: 10px; letter-spacing: 0.12em; color: var(--text3); display: block; margin-bottom: 6px; }
+.setup-input { width: 100%; padding: 12px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; margin-bottom: 12px; transition: border-color 0.2s; font-family: 'Noto Sans TC', sans-serif; }
+.setup-input:focus { border-color: var(--gold); }
+.setup-input::placeholder { color: var(--text3); }
+.setup-note { font-size: 10px; color: var(--text3); text-align: center; margin-top: 12px; line-height: 1.6; }
+
+/* Filters */
+.filter-bar { padding: 10px 18px; display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.ftag { flex-shrink: 0; padding: 4px 13px; border: 1px solid var(--border2); border-radius: 20px; background: transparent; font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.ftag:hover { border-color: var(--gold); color: var(--gold); }
+.ftag.on { background: var(--gold); border-color: var(--gold); color: #1a1610; font-weight: 500; }
+
+/* Grid */
+.grid { flex: 1; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-content: start; }
+
+/* Card */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; animation: fu 0.3s ease forwards; }
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+@keyframes fu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.card-img { width: 100%; height: 168px; object-fit: cover; display: block; background: var(--bg3); }
+.card-ph { width: 100%; height: 168px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 38px; color: var(--text3); }
+.card-body { padding: 14px; }
+.card-cat { font-size: 10px; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 5px; text-transform: uppercase; }
+.card-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+.card-addr { font-size: 11px; color: var(--text2); font-weight: 300; line-height: 1.5; margin-bottom: 10px; }
+.card-foot { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 11px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; color: var(--text2); font-size: 11px; text-decoration: none; transition: all 0.15s; }
+.map-btn:hover { border-color: var(--gold); color: var(--gold); }
+.rating { font-size: 11px; color: var(--gold); }
+.del-btn { margin-left: auto; background: none; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 3px; opacity: 0.5; transition: all 0.15s; }
+.del-btn:hover { color: var(--accent); opacity: 1; }
+
+/* Empty */
+.empty { grid-column: 1 / -1; text-align: center; padding: 72px 20px; }
+.empty-icon { font-size: 46px; margin-bottom: 14px; opacity: 0.35; }
+.empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text2); margin-bottom: 8px; }
+.empty-sub { font-size: 12px; color: var(--text3); line-height: 1.8; }
+
+/* FAB */
+.fab { position: fixed; bottom: 26px; right: 22px; width: 54px; height: 54px; border-radius: 50%; background: var(--gold); color: #1a1610; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(201,168,76,0.4); transition: all 0.2s; z-index: 50; }
+.fab:hover { background: var(--gold2); transform: scale(1.08); }
+.fab:active { transform: scale(0.95); }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: rgba(10,9,8,0.92); backdrop-filter: blur(14px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.sheet { background: var(--bg2); border: 1px solid var(--border2); border-radius: 22px 22px 0 0; width: 100%; max-width: 520px; padding: 26px 22px 40px; transform: translateY(30px); transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1); max-height: 92vh; overflow-y: auto; }
+.overlay.open .sheet { transform: translateY(0); }
+.handle { width: 34px; height: 3px; background: var(--border2); border-radius: 2px; margin: 0 auto 20px; }
+.sheet-title { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--gold); margin-bottom: 4px; }
+.sheet-sub { font-size: 12px; color: var(--text3); margin-bottom: 18px; line-height: 1.6; }
+
+/* Search input */
+.search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.search-input { flex: 1; padding: 13px 15px; background: var(--bg3); border: 1.5px solid var(--border2); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; font-family: 'Noto Sans TC', sans-serif; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--text3); }
+.btn-search { padding: 13px 18px; background: var(--gold); color: #1a1610; border: none; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s; }
+.btn-search:hover { background: var(--gold2); }
+.btn-search:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+
+/* Hint */
+.hint { font-size: 11px; color: var(--text3); margin-bottom: 14px; line-height: 1.6; padding: 8px 12px; background: var(--bg3); border-radius: 7px; }
+.hint strong { color: var(--text2); }
+
+/* Category */
+.cat-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+.cat-btn { padding: 5px 13px; border: 1px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+.cat-btn:hover { border-color: var(--gold); color: var(--gold); }
+.cat-btn.on { background: var(--gold); border-color: var(--gold); color: #1a1610; }
+
+/* Progress */
+.prog { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; margin-bottom: 8px; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 1px; transition: width 0.4s ease; }
+.status { font-size: 11px; color: var(--gold); text-align: center; min-height: 16px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.status.err { color: var(--accent); }
+
+/* Result preview */
+.result-box { display: flex; gap: 12px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+.result-thumb { width: 68px; height: 68px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--bg2); }
+.result-thumb-ph { width: 68px; height: 68px; border-radius: 8px; flex-shrink: 0; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--text3); }
+.result-info { flex: 1; min-width: 0; }
+.result-name { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--text); margin-bottom: 4px; }
+.result-addr { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.result-rating { font-size: 11px; color: var(--gold); margin-top: 4px; }
+
+/* Search results list */
+.results-list { margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+.result-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; transition: border-color 0.15s; }
+.result-item:hover { border-color: var(--gold); }
+.result-item-icon { font-size: 18px; flex-shrink: 0; }
+.result-item-info { flex: 1; min-width: 0; }
+.result-item-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.result-item-addr { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.result-item-rating { font-size: 11px; color: var(--gold); }
+
+/* Actions */
+.actions { display: flex; gap: 8px; }
+.btn-main { flex: 1; padding: 13px; background: var(--gold); color: #1a1610; border: none; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s; }
+.btn-main:hover { background: var(--gold2); }
+.btn-main:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+.btn-sec { padding: 13px 18px; background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 9px; font-size: 14px; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; width: 11px; height: 11px; border: 1.5px solid var(--border2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
+
+@media (max-width: 480px) {
+  .grid { grid-template-columns: 1fr; padding: 12px; }
+  header { padding: 14px 16px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Setup -->
+<div class="setup-wrap" id="setupWrap">
+  <div class="setup-box">
+    <h2>設定 API Key</h2>
+    <p>填入 Google Places API Key，搜尋店家地址、評分與照片。Key 只存在你的瀏覽器，不會上傳。</p>
+    <label class="setup-label">GOOGLE PLACES API KEY</label>
+    <input class="setup-input" type="password" id="keyInput" placeholder="AIza..." />
+    <button class="btn-main" style="width:100%;margin-top:4px" onclick="saveKey()">開始使用</button>
+    <div class="setup-note">個人使用每月免費 10,000 次，完全夠用</div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">我的收藏 <small>MY SPOTS</small></div>
+  <div class="hdr-right">
+    <span class="cnt" id="cnt">0 個地點</span>
+    <button class="gear" onclick="openSettings()">⚙</button>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <button class="ftag on" onclick="setFilter('all',this)">全部</button>
+  <button class="ftag" onclick="setFilter('餐廳',this)">🍽 餐廳</button>
+  <button class="ftag" onclick="setFilter('咖啡廳',this)">☕ 咖啡廳</button>
+  <button class="ftag" onclick="setFilter('民宿',this)">🏠 民宿</button>
+  <button class="ftag" onclick="setFilter('景點',this)">🌄 景點</button>
+  <button class="ftag" onclick="setFilter('其他',this)">📍 其他</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<button class="fab" onclick="openModal()">＋</button>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="handleOverlay(event)">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title">新增收藏地點</div>
+    <div class="sheet-sub">輸入店名，AI 自動搜尋地址、照片與評分。</div>
+
+    <div class="search-row">
+      <input class="search-input" id="searchInput" type="text" placeholder="輸入店名，例如：三時珈琲 桃園" onkeydown="if(event.key==='Enter')search()" />
+      <button class="btn-search" id="searchBtn" onclick="search()">搜尋</button>
+    </div>
+
+    <div class="hint">💡 <strong>小技巧：</strong>加上城市更精準，例如「山海觀 花蓮」或「% Arabica 台北」</div>
+
+    <div class="cat-row" id="catRow">
+      <button class="cat-btn on" data-cat="餐廳" onclick="selectCat(this)">🍽 餐廳</button>
+      <button class="cat-btn" data-cat="咖啡廳" onclick="selectCat(this)">☕ 咖啡廳</button>
+      <button class="cat-btn" data-cat="民宿" onclick="selectCat(this)">🏠 民宿</button>
+      <button class="cat-btn" data-cat="景點" onclick="selectCat(this)">🌄 景點</button>
+      <button class="cat-btn" data-cat="其他" onclick="selectCat(this)">📍 其他</button>
+    </div>
+
+    <div class="prog" id="prog" style="display:none"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="status" id="status"></div>
+
+    <!-- Multiple results -->
+    <div class="results-list" id="resultsList"></div>
+
+    <!-- Selected result preview -->
+    <div class="result-box" id="resultBox" style="display:none">
+      <div id="resultThumbWrap"></div>
+      <div class="result-info">
+        <div class="result-name" id="resultName"></div>
+        <div class="result-addr" id="resultAddr"></div>
+        <div class="result-rating" id="resultRating"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-sec" onclick="closeModal()">取消</button>
+      <button class="btn-main" id="addBtn" onclick="confirmAdd()" disabled>加入收藏</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ICONS = { 餐廳:'🍽', 咖啡廳:'☕', 民宿:'🏠', 景點:'🌄', 其他:'📍' };
+let spots = JSON.parse(localStorage.getItem('myspots_v4') || '[]');
+let currentFilter = 'all';
+let selectedCat = '餐廳';
+let pendingSpot = null;
+
+function save() { localStorage.setItem('myspots_v4', JSON.stringify(spots)); }
+function getKey() { return localStorage.getItem('gplaceskey') || ''; }
+
+function checkSetup() {
+  document.getElementById('setupWrap').style.display = getKey() ? 'none' : 'flex';
+}
+function saveKey() {
+  const k = document.getElementById('keyInput').value.trim();
+  if (!k) { alert('請填入 API Key'); return; }
+  localStorage.setItem('gplaceskey', k);
+  document.getElementById('setupWrap').style.display = 'none';
+}
+function openSettings() {
+  document.getElementById('keyInput').value = getKey();
+  document.getElementById('setupWrap').style.display = 'flex';
+}
+
+// ── Render ──────────────────────────────────────────────
+function render() {
+  const filtered = currentFilter === 'all' ? spots : spots.filter(s => s.category === currentFilter);
+  document.getElementById('cnt').textContent = spots.length + ' 個地點';
+  const grid = document.getElementById('grid');
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty">
+      <div class="empty-icon">${currentFilter === 'all' ? '🗺' : ICONS[currentFilter]}</div>
+      <div class="empty-title">${spots.length === 0 ? '還沒有收藏' : '這個分類還沒有地點'}</div>
+      <div class="empty-sub">${spots.length === 0 ? '點右下角 ＋ 輸入店名<br>自動搜尋地址與照片' : ''}</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="card">
+      ${s.photoUrl
+        ? `<img class="card-img" src="${s.photoUrl}" alt="${s.name}" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="card-ph">${ICONS[s.category] || '📍'}</div>`}
+      <div class="card-body">
+        <div class="card-cat">${s.category}</div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-addr">${s.address || '地址未取得'}</div>
+        <div class="card-foot">
+          ${s.mapsUrl ? `<a class="map-btn" href="${s.mapsUrl}" target="_blank">📍 Google Maps</a>` : ''}
+          ${s.rating ? `<span class="rating">★ ${s.rating}</span>` : ''}
+          <button class="del-btn" onclick="del('${s.id}')">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function del(id) {
+  if (!confirm('確定刪除？')) return;
+  spots = spots.filter(s => s.id !== id);
+  save(); render();
+}
+
+// ── Modal ──────────────────────────────────────────────
+function openModal() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('resultsList').innerHTML = '';
+  document.getElementById('resultBox').style.display = 'none';
+  document.getElementById('addBtn').disabled = true;
+  document.getElementById('status').textContent = '';
+  document.getElementById('prog').style.display = 'none';
+  pendingSpot = null;
+  setTimeout(() => document.getElementById('searchInput').focus(), 300);
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function handleOverlay(e) { if (e.target.id === 'overlay') closeModal(); }
+
+function selectCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  selectedCat = btn.dataset.cat;
+}
+
+function setProgress(pct, msg, isErr) {
+  document.getElementById('prog').style.display = pct > 0 ? 'block' : 'none';
+  document.getElementById('progFill').style.width = pct + '%';
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = 'status' + (isErr ? ' err' : '');
+}
+
+// ── Search ─────────────────────────────────────────────
+async function search() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { setProgress(0, '請輸入店名', true); return; }
+  const key = getKey();
+  if (!key) { openSettings(); return; }
+
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('resultsList').innerHTML = '';
+  document.getElementById('resultBox').style.display = 'none';
+  document.getElementById('addBtn').disabled = true;
+  pendingSpot = null;
+
+  setProgress(30, '🔍 搜尋中...');
+
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id'
+      },
+      body: JSON.stringify({ textQuery: q, languageCode: 'zh-TW', pageSize: 5 })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API 錯誤，請確認 Key 是否正確');
+    }
+
+    const data = await res.json();
+    const places = data.places || [];
+
+    if (!places.length) {
+      setProgress(0, `找不到「${q}」，試試加上城市名稱`, true);
+      return;
+    }
+
+    setProgress(100, `找到 ${places.length} 個結果，請選擇`);
+
+    // Show results list
+    const list = document.getElementById('resultsList');
+    list.innerHTML = places.map((p, i) => `
+      <div class="result-item" onclick="selectPlace(${i})" data-index="${i}">
+        <div class="result-item-icon">${ICONS[selectedCat] || '📍'}</div>
+        <div class="result-item-info">
+          <div class="result-item-name">${p.displayName?.text || '未知'}</div>
+          <div class="result-item-addr">${p.formattedAddress || ''}</div>
+          ${p.rating ? `<div class="result-item-rating">★ ${p.rating}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    // Store places data for later
+    window._searchResults = places;
+
+  } catch (e) {
+    setProgress(0, '⚠ ' + e.message, true);
+  } finally {
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+async function selectPlace(index) {
+  const place = window._searchResults?.[index];
+  if (!place) return;
+  const key = getKey();
+
+  // Highlight selected
+  document.querySelectorAll('.result-item').forEach((el, i) => {
+    el.style.borderColor = i === index ? 'var(--gold)' : '';
+  });
+
+  setProgress(80, '📸 取得店家照片...');
+
+  let photoUrl = null;
+  if (place.photos?.length) {
+    photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
+  }
+
+  setProgress(100, '✓ 確認後加入收藏');
+
+  pendingSpot = {
+    id: Date.now().toString(),
+    name: place.displayName?.text || '',
+    address: place.formattedAddress || '',
+    category: selectedCat,
+    rating: place.rating || null,
+    mapsUrl: place.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.formattedAddress || '')}`,
+    photoUrl,
+    createdAt: new Date().toISOString()
+  };
+
+  // Show preview
+  const thumbWrap = document.getElementById('resultThumbWrap');
+  thumbWrap.innerHTML = photoUrl
+    ? `<img class="result-thumb" src="${photoUrl}" onerror="this.style.display='none'">`
+    : `<div class="result-thumb-ph">${ICONS[selectedCat]}</div>`;
+
+  document.getElementById('resultName').textContent = pendingSpot.name;
+  document.getElementById('resultAddr').textContent = pendingSpot.address;
+  document.getElementById('resultRating').textContent = pendingSpot.rating ? `★ ${pendingSpot.rating}` : '';
+  document.getElementById('resultBox').style.display = 'flex';
+  document.getElementById('addBtn').disabled = false;
+}
+
+function confirmAdd() {
+  if (!pendingSpot) return;
+  spots.unshift({ ...pendingSpot, category: selectedCat });
+  save(); render(); closeModal();
+}
+
+checkSetup();
+render();
+</script>
+</body>
+</html>
