@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>我的收藏地圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e0c;
+  --bg2: #181714;
+  --bg3: #211f1b;
+  --card: #1e1c18;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --text: #f0ebe0;
+  --text2: #a09880;
+  --text3: #6a6050;
+  --accent: #d4774a;
+  --green: #5a9e6f;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  backdrop-filter: blur(12px);
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.logo span { color: var(--text2); font-size: 12px; font-family: 'Noto Sans TC', sans-serif; font-weight: 300; display: block; margin-top: 3px; letter-spacing: 0.15em; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.count-badge {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+}
+.btn-settings {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+.btn-settings:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── Setup overlay ── */
+.setup-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,9,8,0.96);
+  backdrop-filter: blur(20px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.setup-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px 36px;
+  max-width: 420px;
+  width: 100%;
+}
+.setup-box h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.setup-box p { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
+.setup-box label { font-size: 11px; letter-spacing: 0.12em; color: var(--text3); display: block; margin-bottom: 6px; }
+.setup-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.setup-input:focus { border-color: var(--gold); }
+.setup-input::placeholder { color: var(--text3); }
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  color: #1a1610;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 6px;
+}
+.btn-primary:hover { background: var(--gold2); }
+.btn-primary:active { transform: scale(0.98); }
+.setup-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 14px; line-height: 1.6; }
+.setup-note a { color: var(--gold); text-decoration: none; }
+
+/* ── Filter bar ── */
+.filter-bar {
+  padding: 12px 20px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.ftag {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.ftag:hover { border-color: var(--gold); color: var(--gold); }
+.ftag.active { background: var(--gold); border-color: var(--gold); color: #1a1610; font-weight: 500; }
+
+/* ── Card grid ── */
+.grid-area { flex: 1; padding: 20px; overflow-y: auto; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* ── Spot card ── */
+.spot-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+  animation: fadeUp 0.35s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.spot-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  background: var(--bg3);
+}
+.card-img-placeholder {
+  width: 100%;
+  height: 180px;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: var(--text3);
+}
+.card-body { padding: 16px; }
+.card-cat {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  font-weight: 400;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.card-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.card-addr {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 300;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.card-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.15s;
+  font-weight: 300;
+}
+.card-map-btn:hover { border-color: var(--gold); color: var(--gold); }
+.card-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 400;
+}
+.card-delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.15s;
+  opacity: 0.5;
+}
+.card-delete:hover { color: var(--accent); opacity: 1; }
+.card-source {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Upload area ── */
+.upload-zone {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.fab {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #1a1610;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 24px rgba(201,168,76,0.35);
+  transition: all 0.2s;
+}
+.fab:hover { background: var(--gold2); transform: scale(1.08); }
+.fab:active { transform: scale(0.95); }
+
+/* ── Upload modal ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,9,8,0.92);
+  backdrop-filter: blur(16px);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 560px;
+  padding: 28px 24px 40px;
+  transform: translateY(40px);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.modal-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; line-height: 1.6; }
+
+.drop-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 14px;
+  position: relative;
+}
+.drop-zone:hover, .drop-zone.drag { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+.drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-icon { font-size: 28px; margin-bottom: 8px; }
+.drop-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.drop-text strong { color: var(--gold); }
+
+.preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  display: none;
+  background: var(--bg3);
+}
+.preview-img.show { display: block; }
+
+.cat-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.cat-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cat-btn:hover { border-color: var(--gold); color: var(--gold); }
+.cat-btn.active { background: var(--gold); border-color: var(--gold); color: #1a1610; }
+
+.modal-actions { display: flex; gap: 8px; }
+.btn-analyze {
+  flex: 1;
+  padding: 14px;
+  background: var(--gold);
+  color: #1a1610;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.btn-analyze:hover { background: var(--gold2); }
+.btn-analyze:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+.btn-cancel {
+  padding: 14px 20px;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* ── Progress / status ── */
+.progress-bar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  display: none;
+}
+.progress-bar.show { display: block; }
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 1px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.status-text {
+  font-size: 12px;
+  color: var(--gold);
+  text-align: center;
+  min-height: 18px;
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+}
+
+/* ── Result preview ── */
+.result-preview {
+  display: none;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+.result-preview.show { display: flex; }
+.result-thumb {
+  width: 72px; height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg2);
+}
+.result-info { flex: 1; min-width: 0; }
+.result-name { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--text); margin-bottom: 4px; }
+.result-addr { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.result-rating { font-size: 11px; color: var(--gold); margin-top: 4px; }
+
+/* ── Empty state ── */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+}
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.empty-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text2); margin-bottom: 8px; }
+.empty-sub { font-size: 13px; color: var(--text3); line-height: 1.7; }
+
+/* ── Loading spinner ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 1.5px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .modal-sheet { border-radius: 20px 20px 0 0; }
+  header { padding: 16px 18px 12px; }
+  .logo { font-size: 18px; }
+  .grid-area { padding: 14px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    我的收藏
+    <span>MY SPOTS</span>
+  </div>
+  <div class="header-right">
+    <span class="count-badge" id="countBadge">0 個地點</span>
+    <button class="btn-settings" onclick="openSettings()" title="設定 API Key">⚙</button>
+  </div>
+</header>
+
+<!-- Setup overlay -->
+<div class="setup-overlay" id="setupOverlay">
+  <div class="setup-box">
+    <h2>設定 API Key</h2>
+    <p>這個工具需要兩組 API Key 才能運作。設定完成後資料只存在你的瀏覽器，不會上傳任何地方。</p>
+    <label>ANTHROPIC API KEY（Claude AI 辨識截圖）</label>
+    <input class="setup-input" type="password" id="claudeKeyInput" placeholder="sk-ant-..." />
+    <label>GOOGLE PLACES API KEY（搜尋地址與圖片）</label>
+    <input class="setup-input" type="password" id="googleKeyInput" placeholder="AIza..." />
+    <button class="btn-primary" onclick="saveKeys()">開始使用</button>
+    <div class="setup-note">
+      兩組 Key 都只存在你的瀏覽器 localStorage，不會傳送到任何伺服器。<br>
+      <a href="https://console.anthropic.com" target="_blank">申請 Anthropic Key</a> ·
+      <a href="https://console.cloud.google.com" target="_blank">申請 Google Key</a>
+    </div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar" id="filterBar">
+  <button class="ftag active" onclick="setFilter('all',this)">全部</button>
+  <button class="ftag" onclick="setFilter('餐廳',this)">🍽 餐廳</button>
+  <button class="ftag" onclick="setFilter('咖啡廳',this)">☕ 咖啡廳</button>
+  <button class="ftag" onclick="setFilter('民宿',this)">🏠 民宿</button>
+  <button class="ftag" onclick="setFilter('景點',this)">🌄 景點</button>
+  <button class="ftag" onclick="setFilter('其他',this)">📍 其他</button>
+</div>
+
+<!-- Card grid -->
+<div class="grid-area">
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- FAB -->
+<div class="upload-zone">
+  <button class="fab" onclick="openModal()" title="新增地點">＋</button>
+</div>
+
+<!-- Upload modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">新增收藏地點</div>
+    <div class="modal-sub">上傳 Threads / IG 貼文截圖，AI 自動辨識店名並搜尋完整資訊。</div>
+
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="status-text" id="statusText"></div>
+
+    <div class="result-preview" id="resultPreview">
+      <img class="result-thumb" id="resultThumb" src="" alt="">
+      <div class="result-info">
+        <div class="result-name" id="resultName"></div>
+        <div class="result-addr" id="resultAddr"></div>
+        <div class="result-rating" id="resultRating"></div>
+      </div>
+    </div>
+
+    <img class="preview-img" id="previewImg" alt="預覽">
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" accept="image/*" id="fileInput" onchange="handleFile(event)">
+      <div class="drop-icon">📸</div>
+      <div class="drop-text">點擊上傳截圖<br><strong>或從相簿選取</strong></div>
+    </div>
+
+    <div class="cat-row" id="catRow">
+      <button class="cat-btn active" data-cat="餐廳" onclick="selectCat(this)">🍽 餐廳</button>
+      <button class="cat-btn" data-cat="咖啡廳" onclick="selectCat(this)">☕ 咖啡廳</button>
+      <button class="cat-btn" data-cat="民宿" onclick="selectCat(this)">🏠 民宿</button>
+      <button class="cat-btn" data-cat="景點" onclick="selectCat(this)">🌄 景點</button>
+      <button class="cat-btn" data-cat="其他" onclick="selectCat(this)">📍 其他</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()" disabled>AI 辨識並新增</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let spots = JSON.parse(localStorage.getItem('myspots_v2') || '[]');
+let currentFilter = 'all';
+let currentFile = null;
+let currentFileB64 = null;
+let selectedCat = '餐廳';
+let pendingSpot = null;
+
+function save() { localStorage.setItem('myspots_v2', JSON.stringify(spots)); }
+function getClaudeKey() { return localStorage.getItem('claudeKey') || ''; }
+function getGoogleKey() { return localStorage.getItem('googleKey') || ''; }
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+function checkSetup() {
+  if (!getClaudeKey() || !getGoogleKey()) {
+    document.getElementById('setupOverlay').style.display = 'flex';
+  } else {
+    document.getElementById('setupOverlay').style.display = 'none';
+  }
+}
+function saveKeys() {
+  const ck = document.getElementById('claudeKeyInput').value.trim();
+  const gk = document.getElementById('googleKeyInput').value.trim();
+  if (!ck || !gk) { alert('請填入兩組 API Key'); return; }
+  localStorage.setItem('claudeKey', ck);
+  localStorage.setItem('googleKey', gk);
+  document.getElementById('setupOverlay').style.display = 'none';
+}
+function openSettings() {
+  document.getElementById('claudeKeyInput').value = getClaudeKey();
+  document.getElementById('googleKeyInput').value = getGoogleKey();
+  document.getElementById('setupOverlay').style.display = 'flex';
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderCards() {
+  const grid = document.getElementById('cardGrid');
+  const filtered = currentFilter === 'all' ? spots : spots.filter(s => s.category === currentFilter);
+  document.getElementById('countBadge').textContent = spots.length + ' 個地點';
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🗺</div>
+      <div class="empty-title">${spots.length === 0 ? '還沒有收藏' : '這個分類還沒有地點'}</div>
+      <div class="empty-sub">點右下角 ＋ 上傳截圖<br>AI 會自動幫你整理</div>
+    </div>`;
+    return;
+  }
+
+  const ICONS = { 餐廳:'🍽', 咖啡廳:'☕', 民宿:'🏠', 景點:'🌄', 其他:'📍' };
+  grid.innerHTML = filtered.map(s => `
+    <div class="spot-card">
+      ${s.photoUrl
+        ? `<img class="card-img" src="${s.photoUrl}" alt="${s.name}" loading="lazy">`
+        : `<div class="card-img-placeholder">${ICONS[s.category]||'📍'}</div>`}
+      <div class="card-body">
+        <div class="card-cat">${s.category}</div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-addr">${s.address || '地址查詢中...'}</div>
+        <div class="card-footer">
+          ${s.mapsUrl ? `<a class="card-map-btn" href="${s.mapsUrl}" target="_blank">📍 Google Maps</a>` : ''}
+          ${s.rating ? `<span class="card-rating">★ ${s.rating}</span>` : ''}
+          <button class="card-delete" onclick="deleteSpot('${s.id}')">✕</button>
+        </div>
+        ${s.sourceNote ? `<div class="card-source">來源：${s.sourceNote}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function deleteSpot(id) {
+  if (!confirm('確定刪除？')) return;
+  spots = spots.filter(s => s.id !== id);
+  save();
+  renderCards();
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  resetModal();
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function resetModal() {
+  currentFile = null; currentFileB64 = null; pendingSpot = null;
+  document.getElementById('previewImg').classList.remove('show');
+  document.getElementById('previewImg').src = '';
+  document.getElementById('resultPreview').classList.remove('show');
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('analyzeBtn').textContent = 'AI 辨識並新增';
+  document.getElementById('statusText').textContent = '';
+  document.getElementById('progressBar').classList.remove('show');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('dropZone').style.display = 'block';
+  document.getElementById('fileInput').value = '';
+}
+
+function selectCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCat = btn.dataset.cat;
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  currentFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    currentFileB64 = ev.target.result.split(',')[1];
+    document.getElementById('previewImg').src = ev.target.result;
+    document.getElementById('previewImg').classList.add('show');
+    document.getElementById('dropZone').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('fileInput').files = dt.files;
+    handleFile({ target: { files: [file] } });
+  }
+});
+
+// ── Analyze ────────────────────────────────────────────────────────────────
+function setProgress(pct, msg) {
+  document.getElementById('progressBar').classList.add('show');
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('statusText').textContent = msg;
+}
+
+async function analyze() {
+  if (!currentFileB64) return;
+  const claudeKey = getClaudeKey();
+  const googleKey = getGoogleKey();
+  if (!claudeKey || !googleKey) { openSettings(); return; }
+
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('analyzeBtn').textContent = '分析中...';
+  document.getElementById('resultPreview').classList.remove('show');
+
+  try {
+    // Step 1: Claude vision
+    setProgress(20, '🔍 AI 辨識截圖中...');
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': claudeKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: currentFile.type || 'image/jpeg', data: currentFileB64 } },
+            { type: 'text', text: `這是一張社群媒體貼文截圖。請辨識這間店或地點的名稱，只回傳純 JSON（無說明、無 markdown）：
+{"name":"店名（繁體中文）","hint":"所在城市或地區的簡短提示，例如台北大安區、花蓮市區","confidence":"high/medium/low"}
+如果截圖中有多個地點，只取最主要的一個。` }
+          ]
+        }]
+      })
+    });
+
+    if (!claudeRes.ok) {
+      const err = await claudeRes.json();
+      throw new Error(err.error?.message || 'Claude API 錯誤');
+    }
+
+    const claudeData = await claudeRes.json();
+    const rawText = claudeData.content?.map(c => c.text || '').join('') || '';
+    const parsed = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+    const recognizedName = parsed.name;
+    const hint = parsed.hint || '';
+
+    setProgress(50, `✓ 辨識到「${recognizedName}」，搜尋資訊中...`);
+
+    // Step 2: Google Places Text Search
+    const searchQuery = hint ? `${recognizedName} ${hint}` : recognizedName;
+    const placesRes = await fetch(
+      `https://places.googleapis.com/v1/places:searchText`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': googleKey,
+          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id'
+        },
+        body: JSON.stringify({ textQuery: searchQuery, languageCode: 'zh-TW' })
+      }
+    );
+
+    if (!placesRes.ok) throw new Error('Google Places API 錯誤');
+    const placesData = await placesRes.json();
+    const place = placesData.places?.[0];
+
+    if (!place) throw new Error(`找不到「${recognizedName}」的地點資料，請手動新增`);
+
+    setProgress(80, '📸 取得店家照片...');
+
+    // Step 3: Get photo
+    let photoUrl = null;
+    if (place.photos?.length) {
+      const photoName = place.photos[0].name;
+      photoUrl = `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=400&maxWidthPx=600&key=${googleKey}`;
+    }
+
+    setProgress(100, '✓ 完成！');
+
+    pendingSpot = {
+      id: Date.now().toString(),
+      name: place.displayName?.text || recognizedName,
+      address: place.formattedAddress || '',
+      category: selectedCat,
+      rating: place.rating || null,
+      mapsUrl: place.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.formattedAddress || recognizedName)}`,
+      photoUrl,
+      placeId: place.id || '',
+      sourceNote: 'Threads / IG',
+      createdAt: new Date().toISOString()
+    };
+
+    // Show result preview
+    document.getElementById('resultName').textContent = pendingSpot.name;
+    document.getElementById('resultAddr').textContent = pendingSpot.address;
+    document.getElementById('resultRating').textContent = pendingSpot.rating ? `★ ${pendingSpot.rating}` : '';
+    if (photoUrl) {
+      document.getElementById('resultThumb').src = photoUrl;
+      document.getElementById('resultThumb').onerror = () => { document.getElementById('resultThumb').style.display = 'none'; };
+    } else {
+      document.getElementById('resultThumb').style.display = 'none';
+    }
+    document.getElementById('resultPreview').classList.add('show');
+
+    document.getElementById('analyzeBtn').disabled = false;
+    document.getElementById('analyzeBtn').textContent = '✓ 確認加入收藏';
+    document.getElementById('analyzeBtn').onclick = confirmAdd;
+
+  } catch (err) {
+    setProgress(0, '');
+    document.getElementById('progressBar').classList.remove('show');
+    document.getElementById('statusText').textContent = '⚠ ' + err.message;
+    document.getElementById('statusText').style.color = '#d4774a';
+    document.getElementById('analyzeBtn').disabled = false;
+    document.getElementById('analyzeBtn').textContent = 'AI 辨識並新增';
+  }
+}
+
+function confirmAdd() {
+  if (!pendingSpot) return;
+  spots.unshift(pendingSpot);
+  save();
+  renderCards();
+  closeModal();
+  pendingSpot = null;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+checkSetup();
+renderCards();
+</script>
+</body>
+</html>
