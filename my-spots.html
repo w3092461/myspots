@@ -185,8 +185,12 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .btn-main:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-sec { padding: 13px 18px; background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 9px; font-size: 13px; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; }
 
-/* Detail sheet */
+.detail-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--bg3); border: none; color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.detail-close:hover { background: var(--border2); color: var(--text); }
+.sheet { position: relative; }
 .detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; background: var(--bg2); }
+.detail-ph { width: 100%; height: 200px; background: var(--bg2); border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+.detail-ph svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1; }
 .detail-ph { width: 100%; height: 200px; background: var(--bg2); border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
 .detail-ph svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1; }
 .detail-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
@@ -303,8 +307,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <div class="view-tabs">
   <button class="view-tab on" onclick="setView('all',this)">全部</button>
   <button class="view-tab" onclick="setView('county',this)">縣市</button>
+  <button class="view-tab" onclick="setView('fav',this)">精選</button>
   <button class="view-tab" onclick="setView('visited',this)">已去過</button>
-  <button class="view-tab" onclick="setView('fav',this)">❤ 最愛</button>
 </div>
 
 <!-- Filter bar -->
@@ -429,22 +433,22 @@ const SVG = {
   heart:    `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
   pin:      `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
   // 分類 icons（選擇器用）
-  cutlery:  `<svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><line x1="7" y1="2" x2="7" y2="11"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h1v7"/></svg>`,
+  cutlery:  `<svg viewBox="0 0 24 24"><line x1="8" y1="2" x2="8" y2="10"/><path d="M5 2v4a3 3 0 0 0 6 0V2"/><line x1="8" y1="13" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/></svg>`,
   coffee:   `<svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/></svg>`,
   home:     `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
   mountain: `<svg viewBox="0 0 24 24"><polygon points="3 17 9 7 12 11 15 8 21 17"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
   pin2:     `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
-  dog:      `<svg viewBox="0 0 24 24"><path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2 .336-3.5 2.157-3.5 4v3c0 .957.56 1.786 1.353 2.175L5 15l3.5 3 3.5-3-.353-2.825C12.44 11.786 13 10.957 13 10V7c0-1.105-.895-2-2-2z"/><path d="M14 9h2a2 2 0 0 1 2 2v1l2 2v2h-2l-1-1H9"/><path d="M5 14v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2"/><path d="M9 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4"/></svg>`,
+  dog:      `<svg viewBox="0 0 24 24"><ellipse cx="9" cy="6" rx="2" ry="2.5"/><ellipse cx="15" cy="6" rx="2" ry="2.5"/><ellipse cx="5.5" cy="10" rx="1.8" ry="2.2"/><ellipse cx="18.5" cy="10" rx="1.8" ry="2.2"/><path d="M7 16c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.5-2 3-5 3s-5-1.5-5-3z"/></svg>`,
   laptop:   `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`,
   shopping: `<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
   sun:      `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
   camera:   `<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
   cake:     `<svg viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2 1 2 1"/><line x1="2" y1="21" x2="22" y2="21"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>`,
   wine:     `<svg viewBox="0 0 24 24"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z"/></svg>`,
-  boot:     `<svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M4 20V8l4-4h6l2 3v4h2a2 2 0 0 1 2 2v5"/><path d="M8 20v-6h8v6"/></svg>`,
-  walk:     `<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="1.5"/><path d="M9 8l-2 8"/><path d="M15 8l2 8"/><path d="M9 12h6"/><path d="M7 20l2-4"/><path d="M17 20l-2-4"/></svg>`,
-  flower:   `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2a3 3 0 0 1 3 3c0 1.66-1.34 3-3 3S9 6.66 9 5a3 3 0 0 1 3-3z"/><path d="M12 16a3 3 0 0 1 3 3c0 1.66-1.34 3-3 3s-3-1.34-3-3a3 3 0 0 1 3-3z"/><path d="M2 12a3 3 0 0 1 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3a3 3 0 0 1-3-3z"/><path d="M16 12a3 3 0 0 1 3-3c1.66 0 3 1.34 3 3s-1.34 3-3 3a3 3 0 0 1-3-3z"/><path d="M5.64 5.64a3 3 0 0 1 4.24 0c1.17 1.17 1.17 3.07 0 4.24s-3.07 1.17-4.24 0a3 3 0 0 1 0-4.24z"/><path d="M14.12 14.12a3 3 0 0 1 4.24 0c1.17 1.17 1.17 3.07 0 4.24s-3.07 1.17-4.24 0a3 3 0 0 1 0-4.24z"/><path d="M5.64 18.36a3 3 0 0 1 0-4.24c1.17-1.17 3.07-1.17 4.24 0s1.17 3.07 0 4.24a3 3 0 0 1-4.24 0z"/><path d="M14.12 9.88a3 3 0 0 1 0-4.24c1.17-1.17 3.07-1.17 4.24 0s1.17 3.07 0 4.24a3 3 0 0 1-4.24 0z"/></svg>`,
-  cat:      `<svg viewBox="0 0 24 24"><path d="M12 5c-3.87 0-7 3.13-7 7v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4c0-3.87-3.13-7-7-7z"/><path d="M8 5V3l2 2"/><path d="M16 5V3l-2 2"/><line x1="9" y1="14" x2="9.01" y2="14"/><line x1="15" y1="14" x2="15.01" y2="14"/><path d="M9.5 17.5c.83.5 2.17.5 3 0"/></svg>`,
+  tree:     `<svg viewBox="0 0 24 24"><polygon points="12 2 4 14 9 14 7 20 17 20 15 14 20 14"/><line x1="12" y1="20" x2="12" y2="22"/></svg>`,
+  walk:     `<svg viewBox="0 0 24 24"><circle cx="13" cy="3" r="2"/><path d="M7 21l3-6 2 3 3-4 3 4"/><path d="M10 9l1 3h4l-1-3z"/><line x1="13" y1="9" x2="11" y2="15"/></svg>`,
+  flower:   `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="5.5" rx="2" ry="3"/><ellipse cx="12" cy="18.5" rx="2" ry="3"/><ellipse cx="5.5" cy="12" rx="3" ry="2"/><ellipse cx="18.5" cy="12" rx="3" ry="2"/><ellipse cx="7.4" cy="7.4" rx="2" ry="3" transform="rotate(45 7.4 7.4)"/><ellipse cx="16.6" cy="16.6" rx="2" ry="3" transform="rotate(45 16.6 16.6)"/><ellipse cx="16.6" cy="7.4" rx="2" ry="3" transform="rotate(-45 16.6 7.4)"/><ellipse cx="7.4" cy="16.6" rx="2" ry="3" transform="rotate(-45 7.4 16.6)"/></svg>`,
+  cat:      `<svg viewBox="0 0 24 24"><path d="M5 17V10a7 7 0 0 1 14 0v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 10 3 5l4 3"/><path d="M19 10l2-5-4 3"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/><path d="M10 17q2 1.5 4 0"/></svg>`,
 };
 
 const DEFAULT_CATS = [
@@ -764,6 +768,7 @@ function openDetail(id) {
 
   document.getElementById('detailSheet').innerHTML = `
     <div class="handle"></div>
+    <button class="detail-close" onclick="closeOverlay('detailOverlay')">✕</button>
     ${s.photoUrl ? `<img class="detail-img" src="${s.photoUrl}" onerror="this.style.display='none'">` :
       `<div class="detail-ph">${SVG.pin.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1"')}</div>`}
     <div class="detail-title">${s.name}</div>
@@ -786,6 +791,9 @@ function openDetail(id) {
     </div>
 
     <div class="edit-section">
+      <div class="field"><label>分類</label>
+        <div class="cat-picks" id="detailCatPicks"></div>
+      </div>
       <div class="field"><label>備註</label>
         <textarea class="input" id="editNote" placeholder="推薦理由、必點、注意事項...">${s.note || ''}</textarea>
       </div>
@@ -801,6 +809,24 @@ function openDetail(id) {
     </div>`;
 
   document.getElementById('detailOverlay').classList.add('open');
+  // 渲染分類選擇（用現有 categories 為初始值）
+  renderDetailCats(s.categories || []);
+}
+
+let detailSelectedCats = [];
+function renderDetailCats(initial) {
+  detailSelectedCats = [...initial];
+  const wrap = document.getElementById('detailCatPicks');
+  if (!wrap) return;
+  wrap.innerHTML = allCats().map(c => `
+    <button class="cat-pick ${detailSelectedCats.includes(c.id) ? 'on' : ''}" onclick="toggleDetailCat('${c.id}')">
+      ${catIconSVG(c, 12)} ${c.name}
+    </button>`).join('');
+}
+function toggleDetailCat(id) {
+  if (detailSelectedCats.includes(id)) detailSelectedCats = detailSelectedCats.filter(x => x !== id);
+  else detailSelectedCats.push(id);
+  renderDetailCats(detailSelectedCats);
 }
 
 function saveDetail(id) {
@@ -808,6 +834,7 @@ function saveDetail(id) {
   if (!s) return;
   s.note = document.getElementById('editNote').value.trim();
   s.sourceUrl = document.getElementById('editLink').value.trim();
+  s.categories = [...detailSelectedCats];
   save(); renderMain();
   closeOverlay('detailOverlay');
 }
@@ -1027,7 +1054,7 @@ function confirmAdd() {
 const ICON_OPTS = [
   'cutlery','coffee','home','mountain','pin','dog',
   'laptop','shopping','sun','heart','camera','cake',
-  'wine','boot','walk','flower','cat','globe',
+  'wine','tree','walk','flower','cat','globe',
 ];
 let selectedIcon = 'pin';
 
