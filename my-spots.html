@@ -1198,7 +1198,7 @@ renderFilters();
 renderMain();
 
 // 支援 ?q=店名 或 #店名 URL 參數（iOS 捷徑用）
-(function() {
+function handleUrlQuery() {
   const fromHash = location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
   const fromQuery = new URLSearchParams(location.search).get('q') || '';
   const q = (fromHash || fromQuery).trim();
@@ -1211,7 +1211,10 @@ renderMain();
       }, 400);
     }, 600);
   }
-})();
+}
+handleUrlQuery();
+// 第二次開啟同一頁面時 Safari 只更新 hash，監聽這個事件
+window.addEventListener('hashchange', handleUrlQuery);
 </script>
 </body>
 </html>
