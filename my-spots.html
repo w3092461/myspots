@@ -1203,11 +1203,13 @@ renderMain();
   const fromQuery = new URLSearchParams(location.search).get('q') || '';
   const q = (fromHash || fromQuery).trim();
   if (q && getKey()) {
-    openAddModal();
     setTimeout(() => {
-      document.getElementById('addSearch').value = q;
-      doSearch();
-    }, 350);
+      openAddModal();
+      setTimeout(() => {
+        document.getElementById('addSearch').value = q;
+        doSearch();
+      }, 400);
+    }, 600);
   }
 })();
 </script>
