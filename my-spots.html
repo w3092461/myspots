@@ -978,7 +978,7 @@ async function doSearch() {
   try {
     const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id' },
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id,places.types' },
       body: JSON.stringify({ textQuery: q, languageCode: 'zh-TW', pageSize: 5 })
     });
     if (!res.ok) throw new Error((await res.json()).error?.message || 'API 錯誤');
@@ -1025,6 +1025,15 @@ async function selectSearchResult(i) {
     if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
   }
   if (!county && !addr.includes('台灣') && !addr.includes('臺灣') && addr.length > 0) county = '其他國家';
+
+  // Auto-detect category from Google Place types
+  const types = place.types || [];
+  let autoCat = null;
+  if (types.includes('cafe')) autoCat = 'coffee';
+  else if (types.some(t => ['restaurant','food','meal_takeaway','meal_delivery','bakery','bar'].includes(t))) autoCat = 'food';
+  else if (types.includes('lodging')) autoCat = 'stay';
+  else if (types.some(t => ['tourist_attraction','park','natural_feature','museum','amusement_park','zoo','campground'].includes(t))) autoCat = 'scene';
+  if (autoCat) { addSelectedCats = [autoCat]; renderAddCats(); }
 
   setAddProgress(100, '✓ 確認後加入收藏');
   pendingSpot = { id: Date.now().toString(), name: place.displayName?.text || '', address: addr, county, rating: place.rating || null, mapsUrl: place.googleMapsUri || '', photoUrl, createdAt: new Date().toISOString() };
@@ -1187,6 +1196,20 @@ migrateSpots();
 checkSetup();
 renderFilters();
 renderMain();
+
+// 支援 ?q=店名 或 #店名 URL 參數（iOS 捷徑用）
+(function() {
+  const fromHash = location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
+  const fromQuery = new URLSearchParams(location.search).get('q') || '';
+  const q = (fromHash || fromQuery).trim();
+  if (q && getKey()) {
+    openAddModal();
+    setTimeout(() => {
+      document.getElementById('addSearch').value = q;
+      doSearch();
+    }, 350);
+  }
+})();
 </script>
 </body>
 </html>
