@@ -17,6 +17,7 @@
   --shadow: 0 2px 12px rgba(0,0,0,0.07);
   --radius: 12px;
   --accent-color: #E53935;
+  --accent2-color: #2e9e6b;
 }
 [data-theme="dark"] {
   --bg: #0f0f0f; --bg2: #1a1a1a; --bg3: #242424;
@@ -81,11 +82,11 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 /* ── Card ── */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; cursor: pointer; position: relative; }
-.card:hover { border-color: var(--border2); box-shadow: var(--shadow); transform: translateY(-1px); }
-.card.visited { background: #f0faf4; border-color: #b8e0c8; }
-[data-theme="dark"] .card.visited { background: #0d1f14; border-color: #1e4d2e; }
+.card:hover { border-color: var(--border2); box-shadow: var(--shadow); transform: translateY(-1px); box-shadow: inset 3px 0 0 var(--accent-color), var(--shadow); }
+.card.visited { background: color-mix(in srgb, var(--accent2-color) 8%, white); border-color: color-mix(in srgb, var(--accent2-color) 25%, white); }
+[data-theme="dark"] .card.visited { background: color-mix(in srgb, var(--accent2-color) 12%, #0f0f0f); border-color: color-mix(in srgb, var(--accent2-color) 30%, #0f0f0f); }
 .card.visited .card-name { color: var(--text2); }
-.visited-stamp { position: absolute; top: 10px; right: 10px; background: #2ecc71; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.visited-stamp { position: absolute; top: 10px; right: 10px; background: var(--accent2-color); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 .visited-stamp svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .fav-stamp { position: absolute; top: 10px; left: 10px; background: var(--accent-color); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 .fav-stamp svg { width: 11px; height: 11px; stroke: #fff; fill: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -100,7 +101,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .card-visited-badge { flex-shrink: 0; margin-top: 2px; }
 .card-visited-badge svg { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
 .card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
-.card-cat-tag { font-size: 10px; color: var(--text3); border: 1px solid var(--border2); border-radius: 10px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
+.card-cat-tag { font-size: 10px; color: #fff; background: var(--accent-color); border: none; border-radius: 4px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
 .card-cat-tag svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .card-addr { font-size: 11px; color: var(--text2); font-weight: 300; line-height: 1.5; margin-bottom: 10px; }
 .card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -141,7 +142,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .search-row { display: flex; gap: 8px; }
 .search-row .input { flex: 1; }
-.btn-search { padding: 12px 16px; background: var(--text); color: var(--bg); border: none; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
+.btn-search { padding: 12px 16px; background: var(--accent-color); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
 .btn-search:hover { opacity: 0.8; }
 .btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -153,14 +154,14 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 /* Progress */
 .prog { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; margin-bottom: 8px; }
-.prog-fill { height: 100%; background: var(--text); border-radius: 1px; transition: width 0.4s ease; }
+.prog-fill { height: 100%; background: var(--accent-color); border-radius: 1px; transition: width 0.4s ease; }
 .status { font-size: 11px; color: var(--text2); text-align: center; min-height: 16px; margin-bottom: 10px; }
 .status.err { color: #e05555; }
 
 /* Results */
 .results-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
 .result-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; cursor: pointer; transition: border-color 0.15s; }
-.result-item:hover, .result-item.on { border-color: var(--text); }
+.result-item:hover, .result-item.on { border-color: var(--accent-color); }
 .result-item-info { flex: 1; min-width: 0; }
 .result-item-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
 .result-item-addr { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -181,7 +182,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 /* Actions */
 .actions { display: flex; gap: 8px; margin-top: 4px; }
-.btn-main { flex: 1; padding: 13px; background: var(--text); color: var(--bg); border: none; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
+.btn-main { flex: 1; padding: 13px; background: var(--accent-color); color: #fff; border: none; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: opacity 0.15s; }
 .btn-main:hover { opacity: 0.85; }
 .btn-main:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-sec { padding: 13px 18px; background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 9px; font-size: 13px; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; }
@@ -269,11 +270,19 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     <button class="btn-main" style="width:100%" onclick="saveKey()">儲存</button>
 
     <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
-      <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase">強調色</label>
+      <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase">強調色（標籤、按鈕）</label>
       <div style="display:flex;align-items:center;gap:8px">
-        <input type="color" id="accentPick" value="#E8472A" oninput="onAccentPick(this.value)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);cursor:pointer;padding:2px;background:none;flex-shrink:0">
-        <input class="input" id="accentHex" placeholder="#E8472A" maxlength="7" style="flex:1;padding:9px 12px" oninput="onAccentHex(this.value)">
+        <input type="color" id="accentPick" value="#E53935" oninput="onAccentPick(this.value)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);cursor:pointer;padding:2px;background:none;flex-shrink:0">
+        <input class="input" id="accentHex" placeholder="#E53935" maxlength="7" style="flex:1;padding:9px 12px" oninput="onAccentHex(this.value)">
         <button onclick="resetAccent()" style="padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Noto Sans TC',sans-serif">還原</button>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase">第二強調色（已去過標記）</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="color" id="accent2Pick" value="#2e9e6b" oninput="onAccent2Pick(this.value)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);cursor:pointer;padding:2px;background:none;flex-shrink:0">
+        <input class="input" id="accent2Hex" placeholder="#2e9e6b" maxlength="7" style="flex:1;padding:9px 12px" oninput="onAccent2Hex(this.value)">
+        <button onclick="resetAccent2()" style="padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Noto Sans TC',sans-serif">還原</button>
       </div>
     </div>
 
@@ -516,6 +525,31 @@ function resetAccent() {
   document.getElementById('accentHex').value = DEFAULT_ACCENT;
 }
 
+const DEFAULT_ACCENT2 = '#2e9e6b';
+let accent2Color = localStorage.getItem('myspots_theme_color2') || DEFAULT_ACCENT2;
+
+function applyAccent2(color, save = true) {
+  document.documentElement.style.setProperty('--accent2-color', color);
+  accent2Color = color;
+  if (save) localStorage.setItem('myspots_theme_color2', color);
+}
+function onAccent2Pick(hex) {
+  document.getElementById('accent2Hex').value = hex;
+  applyAccent2(hex);
+}
+function onAccent2Hex(val) {
+  const hex = val.trim();
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
+  document.getElementById('accent2Pick').value = hex;
+  applyAccent2(hex);
+}
+function resetAccent2() {
+  applyAccent2(DEFAULT_ACCENT2);
+  localStorage.removeItem('myspots_theme_color2');
+  document.getElementById('accent2Pick').value = DEFAULT_ACCENT2;
+  document.getElementById('accent2Hex').value = DEFAULT_ACCENT2;
+}
+
 // ── Theme ──────────────────────────────────────────────────────────────────
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', theme);
@@ -541,6 +575,8 @@ function openSettings() {
   document.getElementById('keyInput').value = getKey();
   document.getElementById('accentPick').value = accentColor;
   document.getElementById('accentHex').value = accentColor;
+  document.getElementById('accent2Pick').value = accent2Color;
+  document.getElementById('accent2Hex').value = accent2Color;
   document.getElementById('setupWrap').style.display = 'flex';
 }
 
@@ -1274,6 +1310,7 @@ function migrateSpots() {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 applyAccent(accentColor, false);
+applyAccent2(accent2Color, false);
 applyTheme();
 migrateSpots();
 checkSetup();
