@@ -669,7 +669,7 @@ function makeCard(s) {
   card.innerHTML = `
     ${s.visited ? `<div class="visited-stamp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
     ${s.favourited ? `<div class="fav-stamp"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>` : ''}
-    ${s.photoUrl ? `<img class="card-img" src="${s.photoUrl}" loading="lazy" onerror="this.style.display='none'">` :
+    ${(s.photoData || s.photoUrl) ? `<img class="card-img" src="${s.photoData || s.photoUrl}" loading="lazy" onerror="this.style.display='none'">` :
       `<div class="card-ph">${SVG.pin.replace('<svg', '<svg width="36" height="36" stroke="var(--text3)" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"')}</div>`}
     <div class="card-body">
       <div class="card-top">
@@ -808,8 +808,9 @@ function openDetail(id) {
   document.getElementById('detailSheet').innerHTML = `
     <div class="handle"></div>
     <button class="detail-close" onclick="closeOverlay('detailOverlay')">✕</button>
-    ${s.photoUrl ? `<img class="detail-img" src="${s.photoUrl}" onerror="this.style.display='none'">` :
+    ${(s.photoData || s.photoUrl) ? `<img class="detail-img" src="${s.photoData || s.photoUrl}" onerror="this.style.display='none'" id="detail-photo-img">` :
       `<div class="detail-ph">${SVG.pin.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1"')}</div>`}
+    ${s.photoUrl && !s.photoData ? `<button onclick="cachePhoto('${id}')" style="width:100%;margin-bottom:12px;padding:8px;background:var(--bg2);border:1px dashed var(--border2);border-radius:8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Noto Sans TC',sans-serif" id="cache-photo-btn">📷 儲存圖片到本機（離線也能看）</button>` : ''}
     <div class="detail-title">${s.name}</div>
     ${cats ? `<div class="detail-cats">${cats}</div>` : ''}
     ${s.address ? `<div class="detail-row">${SVG.pin.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.address}</span></div>` : ''}
@@ -850,6 +851,23 @@ function openDetail(id) {
   document.getElementById('detailOverlay').classList.add('open');
   // 渲染分類選擇（用現有 categories 為初始值）
   renderDetailCats(s.categories || []);
+}
+
+async function cachePhoto(id) {
+  const s = spots.find(x => x.id === id);
+  if (!s?.photoUrl) return;
+  const btn = document.getElementById('cache-photo-btn');
+  if (btn) { btn.textContent = '⏳ 下載中...'; btn.disabled = true; }
+  const data = await fetchPhotoBase64(s.photoUrl);
+  if (data) {
+    s.photoData = data;
+    save();
+    const img = document.getElementById('detail-photo-img');
+    if (img) img.src = data;
+    if (btn) btn.remove();
+  } else {
+    if (btn) { btn.textContent = '❌ 下載失敗（需在 GitHub Pages 上操作）'; btn.disabled = false; }
+  }
 }
 
 let detailSelectedCats = [];
@@ -1090,12 +1108,34 @@ async function selectSearchResult(i) {
   if (county) document.getElementById('addCounty').value = county;
 }
 
-function confirmAdd() {
+async function fetchPhotoBase64(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+async function confirmAdd() {
   if (!pendingSpot) return;
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true;
   const county = document.getElementById('addCounty').value || pendingSpot.county || '';
-  spots.unshift({ ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false });
+  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null };
+  if (spot.photoUrl) {
+    setAddProgress(90, '📷 儲存圖片中...');
+    spot.photoData = await fetchPhotoBase64(spot.photoUrl) || null;
+  }
+  spots.unshift(spot);
   save(); renderMain();
   closeOverlay('addOverlay');
+  btn.disabled = false;
 }
 
 // ── Custom cat ─────────────────────────────────────────────────────────────
@@ -1225,6 +1265,7 @@ function migrateSpots() {
     if (updated.county === undefined) { updated.county = ''; changed = true; }
     if (updated.lat === undefined) { updated.lat = null; changed = true; }
     if (updated.lng === undefined) { updated.lng = null; changed = true; }
+    if (updated.photoData === undefined) { updated.photoData = null; changed = true; }
     return updated;
   });
   if (catsChanged) saveCats();
