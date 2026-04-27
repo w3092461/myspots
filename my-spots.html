@@ -192,7 +192,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .detail-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--bg3); border: none; color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 10; }
 .detail-close:hover { background: var(--border2); color: var(--text); }
 .sheet { position: relative; }
-.detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; background: var(--bg2); }
+.detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 0; margin-bottom: 0; background: var(--bg2); display: block; }
 .detail-ph { width: 100%; height: 200px; background: var(--bg2); border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
 .detail-ph svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1; }
 .detail-ph { width: 100%; height: 200px; background: var(--bg2); border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
@@ -212,6 +212,15 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 /* Edit form in detail */
 .edit-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* ── Photo upload & focal drag ── */
+.focal-wrap { position: relative; border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; user-select: none; -webkit-user-select: none; }
+.focal-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.focal-overlay { position: absolute; inset: 0; cursor: crosshair; }
+.focal-dot { position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid #fff; background: rgba(255,255,255,0.2); box-shadow: 0 0 0 1.5px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.3); transform: translate(-50%,-50%); pointer-events: none; transition: left 0.05s, top 0.05s; }
+.focal-hint { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 8px; text-align: center; font-size: 10px; color: rgba(255,255,255,0.9); background: linear-gradient(transparent, rgba(0,0,0,0.5)); pointer-events: none; letter-spacing: 0.03em; }
+.upload-trigger { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; border: 1.5px dashed var(--border2); border-radius: var(--radius); font-size: 12px; color: var(--text3); cursor: pointer; transition: all 0.15s; background: var(--bg2); font-family: 'Noto Sans TC', sans-serif; }
+.upload-trigger:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
 /* Setup */
 .setup-wrap { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -378,6 +387,21 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
       </div>
     </div>
 
+    <!-- Photo upload (shown after place selected) -->
+    <div id="addPhotoSection" style="display:none;margin-bottom:4px">
+      <div class="focal-wrap" id="addFocalWrap" style="display:none">
+        <img id="addFocalImg" src="" alt="">
+        <div class="focal-overlay" id="addFocalOverlay"></div>
+        <div class="focal-dot" id="addFocalDot" style="left:50%;top:50%"></div>
+        <div class="focal-hint">點擊或拖曳設定圖片焦點</div>
+      </div>
+      <label class="upload-trigger" for="photoFileInput">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        上傳自訂圖片（選填，會取代 Google 圖片）
+      </label>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event,'add')">
+    </div>
+
     <div class="field">
       <label>分類（可多選）</label>
       <div class="cat-picks" id="addCatPicks"></div>
@@ -500,6 +524,88 @@ function allCats() { return [...DEFAULT_CATS, ...customCats]; }
 function save() { localStorage.setItem('myspots_v4', JSON.stringify(spots)); }
 function saveCats() { localStorage.setItem('myspots_cats', JSON.stringify(customCats)); }
 function getKey() { return localStorage.getItem('gplaceskey') || ''; }
+
+// ── Photo upload & focal drag ──────────────────────────────────────────────
+let pendingCustomPhoto = null;
+let pendingFocalX = 0.5, pendingFocalY = 0.5;
+let detailFocalX = 0.5, detailFocalY = 0.5;
+let detailCustomPhoto = null;
+let _focalDragging = false;
+
+function compressImage(file, maxPx = 1200, quality = 0.8) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const w = Math.round(img.width * ratio), h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePhotoUpload(e, ctx) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const data = await compressImage(file);
+  if (ctx === 'add') {
+    pendingCustomPhoto = data;
+    pendingFocalX = 0.5; pendingFocalY = 0.5;
+    const img = document.getElementById('addFocalImg');
+    img.src = data;
+    updateFocalDot('addFocalDot', 0.5, 0.5);
+    document.getElementById('addFocalWrap').style.display = 'block';
+    setupFocalDrag('addFocalOverlay', 'addFocalDot', (x, y) => { pendingFocalX = x; pendingFocalY = y; });
+  } else if (ctx === 'detail') {
+    detailCustomPhoto = data;
+    detailFocalX = 0.5; detailFocalY = 0.5;
+    const img = document.getElementById('detailFocalImg');
+    if (img) { img.src = data; }
+    updateFocalDot('detailFocalDot', 0.5, 0.5);
+    document.getElementById('detailFocalWrap').style.display = 'block';
+    setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
+  }
+  e.target.value = '';
+}
+
+function setupFocalDrag(overlayId, dotId, callback) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  const getPos = e => {
+    const rect = overlay.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: Math.max(0, Math.min(1, (cx - rect.left) / rect.width)),
+      y: Math.max(0, Math.min(1, (cy - rect.top) / rect.height))
+    };
+  };
+  const apply = e => {
+    if (!_focalDragging) return;
+    e.preventDefault();
+    const {x, y} = getPos(e);
+    updateFocalDot(dotId, x, y);
+    callback(x, y);
+  };
+  overlay.addEventListener('mousedown', e => { _focalDragging = true; apply(e); });
+  overlay.addEventListener('mousemove', apply);
+  document.addEventListener('mouseup', () => { _focalDragging = false; });
+  overlay.addEventListener('touchstart', e => { _focalDragging = true; apply(e); }, {passive: false});
+  overlay.addEventListener('touchmove', apply, {passive: false});
+  document.addEventListener('touchend', () => { _focalDragging = false; });
+}
+
+function updateFocalDot(dotId, x, y) {
+  const dot = document.getElementById(dotId);
+  if (dot) { dot.style.left = (x * 100) + '%'; dot.style.top = (y * 100) + '%'; }
+}
 
 // ── Accent Color ───────────────────────────────────────────────────────────
 const DEFAULT_ACCENT = '#45A87A';
@@ -707,7 +813,7 @@ function makeCard(s) {
   card.innerHTML = `
     ${s.visited ? `<div class="visited-stamp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
     ${s.favourited ? `<div class="fav-stamp"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>` : ''}
-    ${(s.photoData || s.photoUrl) ? `<img class="card-img" src="${s.photoData || s.photoUrl}" loading="lazy" onerror="this.style.display='none'">` :
+    ${(s.photoData || s.photoUrl) ? `<img class="card-img" src="${s.photoData || s.photoUrl}" loading="lazy" onerror="this.style.display='none'" style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">` :
       `<div class="card-ph">${SVG.pin.replace('<svg', '<svg width="36" height="36" stroke="var(--text3)" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"')}</div>`}
     <div class="card-body">
       <div class="card-top">
@@ -838,17 +944,28 @@ function openDetail(id) {
   const s = spots.find(x => x.id === id);
   if (!s) return;
   editingSpotId = id;
+  detailFocalX = s.focalX ?? 0.5;
+  detailFocalY = s.focalY ?? 0.5;
+  detailCustomPhoto = null;
   const cats = (s.categories || []).map(cid => {
     const cat = allCats().find(c => c.id === cid);
     return cat ? `<span class="card-cat-tag">${catIconSVG(cat, 11)} ${cat.name}</span>` : '';
   }).join('');
+  const hasPic = !!(s.photoData || s.photoUrl);
+  const picSrc = s.photoData || s.photoUrl || '';
+  const fx = ((detailFocalX)*100).toFixed(0), fy = ((detailFocalY)*100).toFixed(0);
 
   document.getElementById('detailSheet').innerHTML = `
     <div class="handle"></div>
     <button class="detail-close" onclick="closeOverlay('detailOverlay')">✕</button>
-    ${(s.photoData || s.photoUrl) ? `<img class="detail-img" src="${s.photoData || s.photoUrl}" onerror="this.style.display='none'" id="detail-photo-img">` :
+    ${hasPic ? `
+      <div class="focal-wrap" id="detailFocalWrap">
+        <img class="detail-img" src="${picSrc}" onerror="this.style.display='none'" id="detailFocalImg" style="height:200px;border-radius:0;margin-bottom:0;object-position:${fx}% ${fy}%">
+        <div class="focal-overlay" id="detailFocalOverlay"></div>
+        <div class="focal-dot" id="detailFocalDot" style="left:${fx}%;top:${fy}%"></div>
+        <div class="focal-hint">點擊或拖曳設定焦點 · 儲存後生效</div>
+      </div>` :
       `<div class="detail-ph">${SVG.pin.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1"')}</div>`}
-    ${s.photoUrl && !s.photoData ? `<button onclick="cachePhoto('${id}')" style="width:100%;margin-bottom:12px;padding:8px;background:var(--bg2);border:1px dashed var(--border2);border-radius:8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Noto Sans TC',sans-serif" id="cache-photo-btn">📷 儲存圖片到本機（離線也能看）</button>` : ''}
     <div class="detail-title">${s.name}</div>
     ${cats ? `<div class="detail-cats">${cats}</div>` : ''}
     ${s.address ? `<div class="detail-row">${SVG.pin.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.address}</span></div>` : ''}
@@ -878,6 +995,22 @@ function openDetail(id) {
       <div class="field"><label>貼文連結</label>
         <input class="input" id="editLink" type="url" placeholder="https://..." value="${s.sourceUrl || ''}" />
       </div>
+      <div class="field">
+        <label>更換圖片</label>
+        <div id="detailUploadPreview" style="display:none;margin-bottom:8px">
+          <div class="focal-wrap" id="detailNewFocalWrap">
+            <img id="detailNewFocalImg" src="" alt="" style="width:100%;height:140px;object-fit:cover;display:block">
+            <div class="focal-overlay" id="detailNewFocalOverlay"></div>
+            <div class="focal-dot" id="detailNewFocalDot" style="left:50%;top:50%"></div>
+            <div class="focal-hint">點擊或拖曳設定焦點</div>
+          </div>
+        </div>
+        <label class="upload-trigger" for="detailPhotoInput">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          上傳新圖片
+        </label>
+        <input type="file" id="detailPhotoInput" accept="image/*" style="display:none" onchange="handleDetailPhotoUpload(event)">
+      </div>
       <div class="actions">
         <button class="detail-btn danger" onclick="deleteSpot('${id}');closeOverlay('detailOverlay')" style="flex:0.5">
           ${SVG.trash.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} 刪除
@@ -887,26 +1020,12 @@ function openDetail(id) {
     </div>`;
 
   document.getElementById('detailOverlay').classList.add('open');
-  // 渲染分類選擇（用現有 categories 為初始值）
   renderDetailCats(s.categories || []);
-}
-
-async function cachePhoto(id) {
-  const s = spots.find(x => x.id === id);
-  if (!s?.photoUrl) return;
-  const btn = document.getElementById('cache-photo-btn');
-  if (btn) { btn.textContent = '⏳ 下載中...'; btn.disabled = true; }
-  const data = await fetchPhotoBase64(s.photoUrl);
-  if (data) {
-    s.photoData = data;
-    save();
-    const img = document.getElementById('detail-photo-img');
-    if (img) img.src = data;
-    if (btn) btn.remove();
-  } else {
-    if (btn) { btn.textContent = '❌ 下載失敗（需在 GitHub Pages 上操作）'; btn.disabled = false; }
+  if (hasPic) {
+    setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
   }
 }
+
 
 let detailSelectedCats = [];
 function renderDetailCats(initial) {
@@ -930,17 +1049,46 @@ function saveDetail(id) {
   s.note = document.getElementById('editNote').value.trim();
   s.sourceUrl = document.getElementById('editLink').value.trim();
   s.categories = [...detailSelectedCats];
+  if (detailCustomPhoto) {
+    s.photoData = detailCustomPhoto;
+    s.photoUrl = null;
+    s.focalX = detailFocalX;
+    s.focalY = detailFocalY;
+    detailCustomPhoto = null;
+  } else {
+    s.focalX = detailFocalX;
+    s.focalY = detailFocalY;
+  }
   save(); renderMain();
   closeOverlay('detailOverlay');
+}
+
+async function handleDetailPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const data = await compressImage(file);
+  detailCustomPhoto = data;
+  detailFocalX = 0.5; detailFocalY = 0.5;
+  const img = document.getElementById('detailNewFocalImg');
+  if (img) img.src = data;
+  updateFocalDot('detailNewFocalDot', 0.5, 0.5);
+  document.getElementById('detailUploadPreview').style.display = 'block';
+  setupFocalDrag('detailNewFocalOverlay', 'detailNewFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
+  e.target.value = '';
 }
 
 // ── Add Modal ──────────────────────────────────────────────────────────────
 function openAddModal() {
   pendingSpot = null;
   addSelectedCats = ['food'];
+  pendingCustomPhoto = null;
+  pendingFocalX = 0.5; pendingFocalY = 0.5;
   document.getElementById('addSearch').value = '';
   document.getElementById('addResults').innerHTML = '';
   document.getElementById('addPreview').style.display = 'none';
+  document.getElementById('addPhotoSection').style.display = 'none';
+  document.getElementById('addFocalWrap').style.display = 'none';
+  document.getElementById('addFocalImg').src = '';
   document.getElementById('addProg').style.display = 'none';
   document.getElementById('addStatus').textContent = '';
   document.getElementById('addBtn').disabled = true;
@@ -1140,35 +1288,25 @@ async function selectSearchResult(i) {
   document.getElementById('addPreviewAddr').textContent = pendingSpot.address;
   document.getElementById('addPreviewRating').textContent = pendingSpot.rating ? `★ ${pendingSpot.rating}` : '';
   document.getElementById('addPreview').style.display = 'flex';
+  document.getElementById('addPhotoSection').style.display = 'block';
   document.getElementById('addBtn').disabled = false;
 
   // Set county dropdown
   if (county) document.getElementById('addCounty').value = county;
 }
 
-async function fetchPhotoBase64(url) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch { return null; }
-}
 
 async function confirmAdd() {
   if (!pendingSpot) return;
   const btn = document.getElementById('addBtn');
   btn.disabled = true;
   const county = document.getElementById('addCounty').value || pendingSpot.county || '';
-  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null };
-  if (spot.photoUrl) {
-    setAddProgress(90, '📷 儲存圖片中...');
-    spot.photoData = await fetchPhotoBase64(spot.photoUrl) || null;
+  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null, focalX: 0.5, focalY: 0.5 };
+  if (pendingCustomPhoto) {
+    spot.photoData = pendingCustomPhoto;
+    spot.photoUrl = null;
+    spot.focalX = pendingFocalX;
+    spot.focalY = pendingFocalY;
   }
   spots.unshift(spot);
   save(); renderMain();
