@@ -30,6 +30,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.2s, color 0.2s; }
 
+/* ── Region toggle ── */
+.region-toggle { display: flex; gap: 2px; background: var(--bg2); border-radius: 6px; padding: 2px; flex-shrink: 0; }
+.region-btn { padding: 5px 11px; border-radius: 4px; border: none; background: transparent; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.region-btn.on { background: var(--accent-color); color: #fff; }
+
 /* ── Header ── */
 .hdr { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--bg); position: sticky; top: 0; z-index: 100; }
 .logo { font-family: 'Noto Sans TC', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
@@ -213,6 +218,29 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 /* Edit form in detail */
 .edit-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 
+/* ── Trip filter row ── */
+.trip-section { padding: 8px 16px; display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; align-items: center; flex-wrap: nowrap; background: var(--bg2); }
+.trip-section::-webkit-scrollbar { display: none; }
+.trip-tag { flex-shrink: 0; padding: 4px 12px; border: 1px solid var(--border2); border-radius: 20px; background: var(--bg); font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+.trip-tag:hover { border-color: var(--text); color: var(--text); }
+.trip-tag.on { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+.trip-tag-del { margin-left: 2px; opacity: 0.6; font-size: 12px; line-height: 1; cursor: pointer; }
+.trip-tag-del:hover { opacity: 1; }
+.trip-add { flex-shrink: 0; padding: 4px 11px; border: 1px dashed var(--border2); border-radius: 20px; background: transparent; font-size: 11px; color: var(--text3); cursor: pointer; white-space: nowrap; }
+.trip-add:hover { border-color: var(--text); color: var(--text); }
+
+/* ── Trip pick in detail ── */
+.trip-picks { display: flex; gap: 5px; flex-wrap: wrap; }
+.trip-pick { padding: 5px 12px; border: 1px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+.trip-pick.on { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+
+/* ── KML modal ── */
+.kml-opt { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: border-color 0.15s; }
+.kml-opt:hover { border-color: var(--text); }
+.kml-opt input[type=radio] { accent-color: var(--accent-color); cursor: pointer; }
+.kml-opt-label { font-size: 13px; color: var(--text); }
+.kml-opt-sub { font-size: 11px; color: var(--text3); }
+
 /* ── Photo upload & focal drag ── */
 .focal-wrap { position: relative; border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; user-select: none; -webkit-user-select: none; }
 .focal-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; }
@@ -304,11 +332,18 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <!-- Header -->
 <header class="hdr">
   <div class="logo">我的收藏 <small>MY SPOTS</small></div>
+  <div class="region-toggle">
+    <button class="region-btn on" id="regionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
+    <button class="region-btn" id="regionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+  </div>
   <div class="hdr-actions">
     <span class="cnt" id="cnt"></span>
     <button class="icon-btn" onclick="toggleTheme()" title="切換主題" id="themeBtn">☀</button>
-    <button class="icon-btn" onclick="exportData()" title="匯出資料">
+    <button class="icon-btn" onclick="exportData()" title="匯出備份 JSON">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="icon-btn" onclick="openKmlModal()" title="匯出 KML">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
     </button>
     <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="匯入資料">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 8 12 3 17 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -334,19 +369,18 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   </div>
 </div>
 
-<!-- View tabs -->
-<div class="view-tabs">
-  <button class="view-tab on" onclick="setView('all',this)">全部</button>
-  <button class="view-tab" onclick="setView('county',this)">縣市</button>
-  <button class="view-tab" onclick="setView('fav',this)">精選</button>
-  <button class="view-tab" onclick="setView('visited',this)">已去過</button>
-</div>
+<!-- View tabs (dynamically rendered) -->
+<div class="view-tabs" id="viewTabs"></div>
 
 <!-- Filter bar -->
 <div class="filter-section" id="filterSection"></div>
 
-<!-- County filter bar (only shown in county view) -->
+<!-- County / Country filter bar -->
 <div class="county-filter-section" id="countyFilterSection" style="display:none"></div>
+<!-- City sub-filter bar (abroad mode only) -->
+<div class="county-filter-section" id="cityFilterSection" style="display:none"></div>
+<!-- Trip filter row -->
+<div class="trip-section" id="tripSection" style="display:none"></div>
 
 <!-- Main content -->
 <div id="mainContent"></div>
@@ -407,8 +441,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
       <div class="cat-picks" id="addCatPicks"></div>
     </div>
 
-    <div class="field">
-      <label>縣市</label>
+    <div class="field" id="addCountyField">
+      <label id="addCountyLabel">縣市</label>
       <select class="input" id="addCounty">
         <option value="">自動偵測 / 不指定</option>
         <option>台北市</option><option>新北市</option><option>桃園市</option>
@@ -418,9 +452,20 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
         <option>雲林縣</option><option>嘉義市</option><option>嘉義縣</option>
         <option>屏東縣</option><option>宜蘭縣</option><option>花蓮縣</option>
         <option>台東縣</option><option>澎湖縣</option><option>金門縣</option>
-        <option>連江縣</option><option>日本</option><option>韓國</option>
-        <option>其他國家</option>
+        <option>連江縣</option>
       </select>
+      <select class="input" id="addCountry" style="display:none;margin-top:6px">
+        <option value="">選擇國家</option>
+        <option>日本</option><option>韓國</option><option>香港</option>
+        <option>新加坡</option><option>泰國</option><option>越南</option>
+        <option>美國</option><option>英國</option><option>法國</option>
+        <option>義大利</option><option>德國</option><option>西班牙</option>
+        <option>澳洲</option><option>加拿大</option><option>其他</option>
+      </select>
+    </div>
+    <div class="field" id="addCityField" style="display:none">
+      <label>城市</label>
+      <input class="input" id="addCity" type="text" placeholder="例如：東京、大阪、首爾..." />
     </div>
 
     <div class="field">
@@ -449,6 +494,49 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <div class="ctx-menu" id="ctxMenu" style="display:none"></div>
 
 <!-- Custom cat modal -->
+<!-- Trip modal -->
+<div class="modal-sm" id="tripModal" style="display:none">
+  <div class="modal-sm-box" style="max-width:360px">
+    <h3>管理行程</h3>
+    <div id="tripList" style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px"></div>
+    <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:6px;text-transform:uppercase">新增行程</label>
+    <input class="input" id="tripModalInput" placeholder="例如：2025 東京夏旅..." style="margin-bottom:12px" onkeydown="if(event.key==='Enter')saveTripModal()" />
+    <div class="actions">
+      <button class="btn-sec" onclick="document.getElementById('tripModal').style.display='none'">關閉</button>
+      <button class="btn-main" onclick="saveTripModal()">新增行程</button>
+    </div>
+  </div>
+</div>
+
+<!-- KML export modal -->
+<div class="modal-sm" id="kmlModal" style="display:none">
+  <div class="modal-sm-box" style="max-width:360px">
+    <h3>匯出 KML</h3>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">KML 可匯入 Google My Maps / Google Earth 顯示地點位置（需有座標資料）</p>
+    <label class="kml-opt">
+      <input type="radio" name="kmlScope" value="current" checked>
+      <div><div class="kml-opt-label">目前顯示的地點</div><div class="kml-opt-sub">依目前的篩選結果匯出</div></div>
+    </label>
+    <label class="kml-opt">
+      <input type="radio" name="kmlScope" value="all">
+      <div><div class="kml-opt-label">全部地點</div><div class="kml-opt-sub">匯出目前模式（台灣 / 國外）的所有地點</div></div>
+    </label>
+    <div id="kmlTripOpts" style="display:none">
+      <label class="kml-opt">
+        <input type="radio" name="kmlScope" value="trip">
+        <div><div class="kml-opt-label">依行程匯出</div><div class="kml-opt-sub">只匯出指定行程的地點</div></div>
+      </label>
+      <select class="input" id="kmlTripSel" style="margin-top:4px;margin-bottom:8px">
+        <option value="">選擇行程...</option>
+      </select>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn-sec" onclick="document.getElementById('kmlModal').style.display='none'">取消</button>
+      <button class="btn-main" onclick="doExportKml()">匯出</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-sm" id="catModal" style="display:none">
   <div class="modal-sm-box">
     <h3>新增自訂分類</h3>
@@ -507,12 +595,17 @@ const DEFAULT_CATS = [
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
-let spots = JSON.parse(localStorage.getItem('myspots_v4') || '[]');
+let region = localStorage.getItem('myspots_region') || 'tw';
+function spotKey() { return region === 'tw' ? 'myspots_v4' : 'myspots_abroad'; }
+function loadSpots() { return JSON.parse(localStorage.getItem(spotKey()) || '[]'); }
+let spots = loadSpots();
 let customCats = JSON.parse(localStorage.getItem('myspots_cats') || '[]');
 let theme = localStorage.getItem('myspots_theme') || 'light';
 let currentView = 'all';
 let currentFilters = [];
 let countyFilter = '';
+let countryFilter = '';
+let abroadCityFilter = '';
 let sortOrder = 'manual';
 let searchQuery = '';
 let pendingSpot = null;
@@ -520,9 +613,13 @@ let dragSrcId = null;
 let editingSpotId = null;
 let addSelectedCats = [];
 
+let trips = JSON.parse(localStorage.getItem('myspots_trips') || '[]');
+let currentTripFilter = '';
+
 function allCats() { return [...DEFAULT_CATS, ...customCats]; }
-function save() { localStorage.setItem('myspots_v4', JSON.stringify(spots)); }
+function save() { localStorage.setItem(spotKey(), JSON.stringify(spots)); }
 function saveCats() { localStorage.setItem('myspots_cats', JSON.stringify(customCats)); }
+function saveTrips() { localStorage.setItem('myspots_trips', JSON.stringify(trips)); }
 function getKey() { return localStorage.getItem('gplaceskey') || ''; }
 
 // ── Photo upload & focal drag ──────────────────────────────────────────────
@@ -694,6 +791,140 @@ function catIconSVG(cat, size = 13) {
   return icon.replace('<svg', `<svg width="${size}" height="${size}" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"`);
 }
 
+// ── Trip functions ─────────────────────────────────────────────────────────
+function renderTripFilter() {
+  const sec = document.getElementById('tripSection');
+  if (!trips.length) { sec.style.display = 'none'; currentTripFilter = ''; return; }
+  sec.style.display = 'flex';
+  sec.innerHTML = trips.map(t =>
+    `<button class="trip-tag ${currentTripFilter === t.id ? 'on' : ''}" onclick="toggleTripFilter('${t.id}')">
+      🗺 ${t.name}
+    </button>`
+  ).join('') +
+  `<button class="trip-add" onclick="openTripModal()">＋ 管理行程</button>`;
+}
+
+function toggleTripFilter(id) {
+  currentTripFilter = currentTripFilter === id ? '' : id;
+  renderTripFilter();
+  renderMain();
+}
+
+function openTripModal() {
+  renderTripList();
+  document.getElementById('tripModalInput').value = '';
+  document.getElementById('tripModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('tripModalInput').focus(), 100);
+}
+
+function renderTripList() {
+  const list = document.getElementById('tripList');
+  if (!trips.length) { list.innerHTML = '<p style="font-size:12px;color:var(--text3)">尚無行程</p>'; return; }
+  list.innerHTML = trips.map(t => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg2);border-radius:8px;font-size:13px;">
+      <span>${t.name}</span>
+      <button onclick="deleteTrip('${t.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px" title="刪除">×</button>
+    </div>`).join('');
+}
+
+function saveTripModal() {
+  const name = document.getElementById('tripModalInput').value.trim();
+  if (!name) return;
+  trips.push({ id: 'trip_' + Date.now(), name, createdAt: new Date().toISOString() });
+  saveTrips();
+  document.getElementById('tripModalInput').value = '';
+  renderTripList();
+  renderTripFilter();
+}
+
+function deleteTrip(id) {
+  if (!confirm('刪除行程後，地點的行程標記也會移除，確定嗎？')) return;
+  trips = trips.filter(t => t.id !== id);
+  spots.forEach(s => { if (s.trips?.includes(id)) s.trips = s.trips.filter(x => x !== id); });
+  if (currentTripFilter === id) currentTripFilter = '';
+  saveTrips(); save();
+  renderTripList(); renderTripFilter(); renderMain();
+}
+
+// ── KML export ─────────────────────────────────────────────────────────────
+function openKmlModal() {
+  document.querySelector('input[name=kmlScope][value=current]').checked = true;
+  const tripOpts = document.getElementById('kmlTripOpts');
+  const kmlSel = document.getElementById('kmlTripSel');
+  if (trips.length) {
+    tripOpts.style.display = 'block';
+    kmlSel.innerHTML = '<option value="">選擇行程...</option>' +
+      trips.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  } else {
+    tripOpts.style.display = 'none';
+  }
+  document.getElementById('kmlModal').style.display = 'flex';
+}
+
+function doExportKml() {
+  const scope = document.querySelector('input[name=kmlScope]:checked')?.value || 'current';
+  let list;
+  if (scope === 'current') list = getFilteredSpots();
+  else if (scope === 'trip') {
+    const tripId = document.getElementById('kmlTripSel').value;
+    if (!tripId) { alert('請選擇行程'); return; }
+    list = spots.filter(s => s.trips?.includes(tripId));
+  } else list = [...spots];
+
+  const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const placemarks = list.map(s => {
+    const coord = (s.lat && s.lng) ? `<Point><coordinates>${s.lng},${s.lat},0</coordinates></Point>` : '';
+    const desc = [s.address, s.rating ? `評分 ${s.rating}` : '', s.note].filter(Boolean).join(' | ');
+    return `  <Placemark>\n    <name>${esc(s.name)}</name>\n    <description>${esc(desc)}</description>\n    ${coord}\n  </Placemark>`;
+  }).join('\n');
+
+  const kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>\n<name>${esc('我的收藏')}</name>\n${placemarks}\n</Document></kml>`;
+  const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `myspots_${new Date().toISOString().slice(0,10)}.kml`;
+  a.click();
+  document.getElementById('kmlModal').style.display = 'none';
+}
+
+// ── Region & View Tabs ─────────────────────────────────────────────────────
+function setRegion(r) {
+  region = r;
+  localStorage.setItem('myspots_region', r);
+  spots = loadSpots();
+  currentView = 'all';
+  currentFilters = [];
+  countyFilter = '';
+  countryFilter = '';
+  abroadCityFilter = '';
+  searchQuery = '';
+  document.getElementById('searchBar').value = '';
+  document.getElementById('searchClear').classList.remove('show');
+  document.getElementById('regionTW').classList.toggle('on', r === 'tw');
+  document.getElementById('regionAbroad').classList.toggle('on', r === 'abroad');
+  renderViewTabs();
+  renderFilters();
+  renderMain();
+}
+
+function renderViewTabs() {
+  const tabs = document.getElementById('viewTabs');
+  const v = currentView;
+  if (region === 'tw') {
+    tabs.innerHTML = `
+      <button class="view-tab ${v==='all'?'on':''}" onclick="setView('all',this)">全部</button>
+      <button class="view-tab ${v==='county'?'on':''}" onclick="setView('county',this)">縣市</button>
+      <button class="view-tab ${v==='fav'?'on':''}" onclick="setView('fav',this)">精選</button>
+      <button class="view-tab ${v==='visited'?'on':''}" onclick="setView('visited',this)">已去過</button>`;
+  } else {
+    tabs.innerHTML = `
+      <button class="view-tab ${v==='all'?'on':''}" onclick="setView('all',this)">全部</button>
+      <button class="view-tab ${v==='country'?'on':''}" onclick="setView('country',this)">國家</button>
+      <button class="view-tab ${v==='fav'?'on':''}" onclick="setView('fav',this)">精選</button>
+      <button class="view-tab ${v==='visited'?'on':''}" onclick="setView('visited',this)">已去過</button>`;
+  }
+}
+
 // ── Filter bar ─────────────────────────────────────────────────────────────
 function renderFilters() {
   const sec = document.getElementById('filterSection');
@@ -705,7 +936,8 @@ function renderFilters() {
       ${isCustom ? `<span class="ftag-del" onclick="event.stopPropagation();deleteCustomCat('${c.id}')" title="刪除分類">×</span>` : ''}
     </button>`;
   }).join('') +
-    `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>`;
+    `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>` +
+    `<button class="ftag-add" onclick="openTripModal()">🗺 行程</button>`;
 }
 
 function toggleFilter(id) {
@@ -721,7 +953,10 @@ function getFilteredSpots() {
   if (currentView === 'visited') list = list.filter(s => s.visited);
   if (currentView === 'fav') list = list.filter(s => s.favourited);
   if (currentFilters.length) list = list.filter(s => s.categories?.some(c => currentFilters.includes(c)));
-  if (countyFilter) list = list.filter(s => s.county === countyFilter);
+  if (region === 'tw' && countyFilter) list = list.filter(s => s.county === countyFilter);
+  if (region === 'abroad' && countryFilter) list = list.filter(s => s.county === countryFilter);
+  if (region === 'abroad' && abroadCityFilter) list = list.filter(s => s.city === abroadCityFilter);
+  if (currentTripFilter) list = list.filter(s => s.trips?.includes(currentTripFilter));
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     list = list.filter(s =>
@@ -739,26 +974,32 @@ function getFilteredSpots() {
 function renderMain() {
   const content = document.getElementById('mainContent');
   document.getElementById('cnt').textContent = spots.length + ' 個地點';
-  renderCountyFilters();
+  renderTripFilter();
 
-  if (currentView === 'county') {
-    renderCountyView(content);
+  if (region === 'tw') {
+    renderCountyFilters();
+    document.getElementById('cityFilterSection').style.display = 'none';
+    if (currentView === 'county') { renderCountyView(content); return; }
   } else {
-    content.innerHTML = '';
-    const grid = document.createElement('div');
-    grid.className = 'grid';
-    const list = getFilteredSpots();
-    if (!list.length) {
-      grid.innerHTML = `<div class="empty">
-        ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
-        <div class="empty-title">${spots.length === 0 ? '還沒有收藏' : '沒有符合的地點'}</div>
-        <div class="empty-sub">${spots.length === 0 ? '點右下角 ＋ 開始收藏吧！' : ''}</div>
-      </div>`;
-    } else {
-      list.forEach(s => grid.appendChild(makeCard(s)));
-    }
-    content.appendChild(grid);
+    document.getElementById('countyFilterSection').style.display = 'none';
+    renderAbroadFilters();
+    if (currentView === 'country') { renderCountryView(content); return; }
   }
+
+  content.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  const list = getFilteredSpots();
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">
+      ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
+      <div class="empty-title">${spots.length === 0 ? '還沒有收藏' : '沒有符合的地點'}</div>
+      <div class="empty-sub">${spots.length === 0 ? '點右下角 ＋ 開始收藏吧！' : ''}</div>
+    </div>`;
+  } else {
+    list.forEach(s => grid.appendChild(makeCard(s)));
+  }
+  content.appendChild(grid);
 }
 
 function renderCountyView(content) {
@@ -794,6 +1035,63 @@ function renderCountyView(content) {
     grid.style.marginTop = '8px';
     items.forEach(s => grid.appendChild(makeCard(s)));
     group.appendChild(grid);
+    sec.appendChild(group);
+  });
+  content.appendChild(sec);
+}
+
+function renderCountryView(content) {
+  const list = getFilteredSpots();
+  const countryGroups = {};
+  list.forEach(s => {
+    const key = s.county || '其他';
+    if (!countryGroups[key]) countryGroups[key] = [];
+    countryGroups[key].push(s);
+  });
+
+  content.innerHTML = '';
+  if (!Object.keys(countryGroups).length) {
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.innerHTML = `<div class="empty">
+      ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
+      <div class="empty-title">${spots.length === 0 ? '還沒有國外收藏' : '沒有符合的地點'}</div>
+      <div class="empty-sub">${spots.length === 0 ? '點右下角 ＋ 開始收藏吧！' : ''}</div>
+    </div>`;
+    content.appendChild(grid);
+    return;
+  }
+
+  const sec = document.createElement('div');
+  sec.className = 'county-section';
+  Object.entries(countryGroups).sort().forEach(([country, items]) => {
+    const group = document.createElement('div');
+    group.className = 'county-group';
+    group.innerHTML = `<div class="county-title">${country} <span class="county-count">${items.length} 個地點</span></div>`;
+
+    const cityGroups = {};
+    items.forEach(s => { const c = s.city || ''; if (!cityGroups[c]) cityGroups[c] = []; cityGroups[c].push(s); });
+    const cityKeys = Object.keys(cityGroups).sort();
+
+    if (cityKeys.length > 1 || cityKeys[0]) {
+      cityKeys.forEach(city => {
+        if (city) {
+          const cityLabel = document.createElement('div');
+          cityLabel.style.cssText = 'font-size:11px;color:var(--text3);font-weight:500;padding:8px 0 4px;margin-top:4px;border-top:1px solid var(--border)';
+          cityLabel.textContent = city;
+          group.appendChild(cityLabel);
+        }
+        const grid = document.createElement('div');
+        grid.className = 'grid'; grid.style.cssText = 'padding:0;margin-top:6px';
+        cityGroups[city].forEach(s => grid.appendChild(makeCard(s)));
+        group.appendChild(grid);
+      });
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'grid'; grid.style.cssText = 'padding:0;margin-top:8px';
+      items.forEach(s => grid.appendChild(makeCard(s)));
+      group.appendChild(grid);
+    }
     sec.appendChild(group);
   });
   content.appendChild(sec);
@@ -854,7 +1152,6 @@ function makeCard(s) {
 // ── County filter bar ──────────────────────────────────────────────────────
 function renderCountyFilters() {
   const sec = document.getElementById('countyFilterSection');
-  // 從所有 spots 取出現有縣市
   const counties = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
   if (!counties.length) { sec.style.display = 'none'; return; }
   sec.style.display = currentView === 'county' ? 'flex' : 'none';
@@ -867,6 +1164,28 @@ function setCountyFilter(c) {
   renderCountyFilters();
   renderMain();
 }
+
+function renderAbroadFilters() {
+  const sec = document.getElementById('countyFilterSection');
+  const countries = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
+  if (!countries.length || currentView !== 'country') { sec.style.display = 'none'; document.getElementById('cityFilterSection').style.display = 'none'; return; }
+  sec.style.display = 'flex';
+  sec.innerHTML = `<button class="county-ftag ${!countryFilter?'on':''}" onclick="setCountryFilter('')">全部</button>` +
+    countries.map(c => `<button class="county-ftag ${countryFilter===c?'on':''}" onclick="setCountryFilter('${c}')">${c}</button>`).join('');
+
+  const citySec = document.getElementById('cityFilterSection');
+  if (countryFilter) {
+    const cities = [...new Set(spots.filter(s => s.county === countryFilter && s.city).map(s => s.city))].sort();
+    if (cities.length) {
+      citySec.style.display = 'flex';
+      citySec.innerHTML = `<button class="county-ftag ${!abroadCityFilter?'on':''}" onclick="setAbroadCityFilter('')">全部城市</button>` +
+        cities.map(c => `<button class="county-ftag ${abroadCityFilter===c?'on':''}" onclick="setAbroadCityFilter('${c}')">${c}</button>`).join('');
+    } else { citySec.style.display = 'none'; }
+  } else { citySec.style.display = 'none'; }
+}
+
+function setCountryFilter(c) { countryFilter = c; abroadCityFilter = ''; renderAbroadFilters(); renderMain(); }
+function setAbroadCityFilter(c) { abroadCityFilter = c; renderAbroadFilters(); renderMain(); }
 
 // ── View / Search ──────────────────────────────────────────────────────────
 function setView(v, btn) {
@@ -995,6 +1314,9 @@ function openDetail(id) {
       <div class="field"><label>貼文連結</label>
         <input class="input" id="editLink" type="url" placeholder="https://..." value="${s.sourceUrl || ''}" />
       </div>
+      ${trips.length ? `<div class="field"><label>行程標籤</label>
+        <div class="trip-picks" id="detailTripPicks"></div>
+      </div>` : ''}
       <div class="field">
         <label>更換圖片</label>
         <div id="detailUploadPreview" style="display:none;margin-bottom:8px">
@@ -1021,6 +1343,7 @@ function openDetail(id) {
 
   document.getElementById('detailOverlay').classList.add('open');
   renderDetailCats(s.categories || []);
+  renderDetailTrips(s.trips || []);
   if (hasPic) {
     setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
   }
@@ -1043,12 +1366,28 @@ function toggleDetailCat(id) {
   renderDetailCats(detailSelectedCats);
 }
 
+let detailSelectedTrips = [];
+function renderDetailTrips(initial) {
+  detailSelectedTrips = [...initial];
+  const wrap = document.getElementById('detailTripPicks');
+  if (!wrap) return;
+  wrap.innerHTML = trips.map(t =>
+    `<button class="trip-pick ${detailSelectedTrips.includes(t.id) ? 'on' : ''}" onclick="toggleDetailTrip('${t.id}')">${t.name}</button>`
+  ).join('');
+}
+function toggleDetailTrip(id) {
+  if (detailSelectedTrips.includes(id)) detailSelectedTrips = detailSelectedTrips.filter(x => x !== id);
+  else detailSelectedTrips.push(id);
+  renderDetailTrips(detailSelectedTrips);
+}
+
 function saveDetail(id) {
   const s = spots.find(x => x.id === id);
   if (!s) return;
   s.note = document.getElementById('editNote').value.trim();
   s.sourceUrl = document.getElementById('editLink').value.trim();
   s.categories = [...detailSelectedCats];
+  s.trips = [...detailSelectedTrips];
   if (detailCustomPhoto) {
     s.photoData = detailCustomPhoto;
     s.photoUrl = null;
@@ -1094,7 +1433,15 @@ function openAddModal() {
   document.getElementById('addBtn').disabled = true;
   document.getElementById('addLink').value = '';
   document.getElementById('addNote').value = '';
+  // 根據 region 切換縣市/國家城市欄位
+  const isTW = region === 'tw';
+  document.getElementById('addCounty').style.display = isTW ? '' : 'none';
   document.getElementById('addCounty').value = '';
+  document.getElementById('addCountry').style.display = isTW ? 'none' : '';
+  document.getElementById('addCountry').value = '';
+  document.getElementById('addCountyLabel').textContent = isTW ? '縣市' : '國家';
+  document.getElementById('addCityField').style.display = isTW ? 'none' : '';
+  document.getElementById('addCity').value = '';
   renderAddCats();
   document.getElementById('acList').style.display = 'none';
   document.getElementById('addOverlay').classList.add('open');
@@ -1254,20 +1601,37 @@ async function selectSearchResult(i) {
   let photoUrl = null;
   if (place.photos?.length) photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
 
-  // Auto detect county from address (supports both 台 and 臺 variants)
-  let county = '';
   const addr = place.formattedAddress || '';
-  const countyMap = [
-    ['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],
-    ['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],
-    ['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],
-    ['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],
-    ['金門縣'],['連江縣']
-  ];
-  for (const variants of countyMap) {
-    if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
+  let county = '', detectedCity = '';
+
+  if (region === 'tw') {
+    const countyMap = [
+      ['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],
+      ['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],
+      ['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],
+      ['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],
+      ['金門縣'],['連江縣']
+    ];
+    for (const variants of countyMap) {
+      if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
+    }
+  } else {
+    // 國外：從 formattedAddress 末端偵測國家
+    const COUNTRY_MAP = [
+      {k:['Japan']   , n:'日本'}, {k:['South Korea','Korea'], n:'韓國'},
+      {k:['Hong Kong'], n:'香港'}, {k:['Singapore'], n:'新加坡'},
+      {k:['Thailand'], n:'泰國'}, {k:['Vietnam'], n:'越南'},
+      {k:['United States','USA'], n:'美國'}, {k:['United Kingdom','England'], n:'英國'},
+      {k:['France'], n:'法國'}, {k:['Italy'], n:'義大利'},
+      {k:['Germany'], n:'德國'}, {k:['Spain'], n:'西班牙'},
+      {k:['Australia'], n:'澳洲'}, {k:['Canada'], n:'加拿大'},
+    ];
+    const lastPart = addr.split(',').pop().trim();
+    for (const {k, n} of COUNTRY_MAP) {
+      if (k.some(kw => lastPart.includes(kw) || addr.includes(kw))) { county = n; break; }
+    }
+    if (!county) county = '其他';
   }
-  if (!county && !addr.includes('台灣') && !addr.includes('臺灣') && addr.length > 0) county = '其他國家';
 
   // Auto-detect category from Google Place types
   const types = place.types || [];
@@ -1291,8 +1655,11 @@ async function selectSearchResult(i) {
   document.getElementById('addPhotoSection').style.display = 'block';
   document.getElementById('addBtn').disabled = false;
 
-  // Set county dropdown
-  if (county) document.getElementById('addCounty').value = county;
+  if (region === 'tw') {
+    if (county) document.getElementById('addCounty').value = county;
+  } else {
+    if (county) document.getElementById('addCountry').value = county;
+  }
 }
 
 
@@ -1300,8 +1667,11 @@ async function confirmAdd() {
   if (!pendingSpot) return;
   const btn = document.getElementById('addBtn');
   btn.disabled = true;
-  const county = document.getElementById('addCounty').value || pendingSpot.county || '';
-  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null, focalX: 0.5, focalY: 0.5 };
+  const county = region === 'tw'
+    ? (document.getElementById('addCounty').value || pendingSpot.county || '')
+    : (document.getElementById('addCountry').value || pendingSpot.county || '');
+  const city = region === 'abroad' ? document.getElementById('addCity').value.trim() : '';
+  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, city, trips: [], sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null, focalX: 0.5, focalY: 0.5 };
   if (pendingCustomPhoto) {
     spot.photoData = pendingCustomPhoto;
     spot.photoUrl = null;
@@ -1442,6 +1812,8 @@ function migrateSpots() {
     if (updated.lat === undefined) { updated.lat = null; changed = true; }
     if (updated.lng === undefined) { updated.lng = null; changed = true; }
     if (updated.photoData === undefined) { updated.photoData = null; changed = true; }
+    if (updated.trips === undefined) { updated.trips = []; changed = true; }
+    if (updated.city === undefined) { updated.city = ''; changed = true; }
     return updated;
   });
   if (catsChanged) saveCats();
@@ -1454,6 +1826,9 @@ applyAccent2(accent2Color, false);
 applyTheme();
 migrateSpots();
 checkSetup();
+document.getElementById('regionTW').classList.toggle('on', region === 'tw');
+document.getElementById('regionAbroad').classList.toggle('on', region === 'abroad');
+renderViewTabs();
 renderFilters();
 renderMain();
 
