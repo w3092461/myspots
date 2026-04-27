@@ -585,13 +585,21 @@ const SVG = {
   cat:      `<svg viewBox="0 0 24 24"><path d="M5 17V10a7 7 0 0 1 14 0v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 10 3 5l4 3"/><path d="M19 10l2-5-4 3"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/><path d="M10 17q2 1.5 4 0"/></svg>`,
 };
 
-const DEFAULT_CATS = [
-  { id: 'food',        name: '餐廳',   icon: 'cutlery' },
-  { id: 'coffee',      name: '咖啡廳', icon: 'coffee' },
-  { id: 'stay',        name: '民宿',   icon: 'home' },
-  { id: 'scene',       name: '景點',   icon: 'mountain' },
+const DEFAULT_CATS_TW = [
+  { id: 'food',        name: '餐廳',     icon: 'cutlery' },
+  { id: 'coffee',      name: '咖啡廳',   icon: 'coffee' },
+  { id: 'stay',        name: '民宿',     icon: 'home' },
+  { id: 'scene',       name: '景點',     icon: 'mountain' },
   { id: 'pet',         name: '寵物友善', icon: 'dog' },
-  { id: 'notimelimit', name: '不限時', icon: 'laptop' },
+  { id: 'notimelimit', name: '不限時',   icon: 'laptop' },
+];
+const DEFAULT_CATS_ABROAD = [
+  { id: 'food',     name: '美食',   icon: 'cutlery' },
+  { id: 'scene',    name: '景點',   icon: 'mountain' },
+  { id: 'stay',     name: '住宿',   icon: 'home' },
+  { id: 'coffee',   name: '咖啡廳', icon: 'coffee' },
+  { id: 'shopping', name: '購物',   icon: 'shopping' },
+  { id: 'dessert',  name: '甜點',   icon: 'cake' },
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -616,7 +624,8 @@ let addSelectedCats = [];
 let trips = JSON.parse(localStorage.getItem('myspots_trips') || '[]');
 let currentTripFilter = '';
 
-function allCats() { return [...DEFAULT_CATS, ...customCats]; }
+function defaultCats() { return region === 'abroad' ? DEFAULT_CATS_ABROAD : DEFAULT_CATS_TW; }
+function allCats() { return [...defaultCats(), ...customCats]; }
 function save() { localStorage.setItem(spotKey(), JSON.stringify(spots)); }
 function saveCats() { localStorage.setItem('myspots_cats', JSON.stringify(customCats)); }
 function saveTrips() { localStorage.setItem('myspots_trips', JSON.stringify(trips)); }
@@ -1568,7 +1577,7 @@ async function doSearch() {
   try {
     const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id,places.types,places.location' },
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.photos,places.googleMapsUri,places.id,places.types,places.location,places.addressComponents' },
       body: JSON.stringify({ textQuery: q, languageCode: 'zh-TW', pageSize: 5 })
     });
     if (!res.ok) throw new Error((await res.json()).error?.message || 'API 錯誤');
@@ -1616,21 +1625,49 @@ async function selectSearchResult(i) {
       if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
     }
   } else {
-    // 國外：從 formattedAddress 末端偵測國家
-    const COUNTRY_MAP = [
-      {k:['Japan']   , n:'日本'}, {k:['South Korea','Korea'], n:'韓國'},
-      {k:['Hong Kong'], n:'香港'}, {k:['Singapore'], n:'新加坡'},
-      {k:['Thailand'], n:'泰國'}, {k:['Vietnam'], n:'越南'},
-      {k:['United States','USA'], n:'美國'}, {k:['United Kingdom','England'], n:'英國'},
-      {k:['France'], n:'法國'}, {k:['Italy'], n:'義大利'},
-      {k:['Germany'], n:'德國'}, {k:['Spain'], n:'西班牙'},
-      {k:['Australia'], n:'澳洲'}, {k:['Canada'], n:'加拿大'},
-    ];
-    const lastPart = addr.split(',').pop().trim();
-    for (const {k, n} of COUNTRY_MAP) {
-      if (k.some(kw => lastPart.includes(kw) || addr.includes(kw))) { county = n; break; }
+    // 國外：優先使用 addressComponents，fallback 到文字比對
+    const COUNTRY_NAME_MAP = {
+      'Japan':'日本','South Korea':'韓國','Hong Kong':'香港','Singapore':'新加坡',
+      'Thailand':'泰國','Vietnam':'越南','United States':'美國','United Kingdom':'英國',
+      'France':'法國','Italy':'義大利','Germany':'德國','Spain':'西班牙',
+      'Australia':'澳洲','Canada':'加拿大','Taiwan':'台灣','China':'中國',
+      'Netherlands':'荷蘭','Belgium':'比利時','Switzerland':'瑞士','Austria':'奧地利',
+      'Portugal':'葡萄牙','Greece':'希臘','Czech Republic':'捷克','Hungary':'匈牙利',
+      'Poland':'波蘭','Sweden':'瑞典','Norway':'挪威','Denmark':'丹麥','Finland':'芬蘭',
+      'New Zealand':'紐西蘭','Malaysia':'馬來西亞','Indonesia':'印尼','Philippines':'菲律賓',
+      'India':'印度','United Arab Emirates':'阿聯酋','Turkey':'土耳其','Mexico':'墨西哥',
+      'Brazil':'巴西','Argentina':'阿根廷',
+    };
+    const components = place.addressComponents || [];
+    const getComp = type => components.find(c => c.types?.includes(type));
+    const countryComp = getComp('country');
+    const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
+
+    if (countryComp) {
+      county = COUNTRY_NAME_MAP[countryComp.longName] || COUNTRY_NAME_MAP[countryComp.shortName] || countryComp.longName || '其他';
+      detectedCity = cityComp?.longName || '';
+    } else {
+      // fallback：關鍵字比對（含城市名）
+      const COUNTRY_MAP = [
+        {k:['Japan','〒','Tokyo','Osaka','Kyoto','Fukuoka','Sapporo','Nagoya','Hiroshima','Yokohama','Kobe','Nara','Okinawa','Sendai','Hokkaido'], n:'日本'},
+        {k:['South Korea','Korea','Seoul','Busan','Incheon','Daegu','Jeju'], n:'韓國'},
+        {k:['Hong Kong'], n:'香港'}, {k:['Singapore'], n:'新加坡'},
+        {k:['Thailand','Bangkok','Chiang Mai','Phuket'], n:'泰國'},
+        {k:['Vietnam','Hanoi','Ho Chi Minh','Da Nang','Hoi An'], n:'越南'},
+        {k:['United States','USA','New York','Los Angeles','Chicago','San Francisco'], n:'美國'},
+        {k:['United Kingdom','England','London','Manchester','Edinburgh'], n:'英國'},
+        {k:['France','Paris','Lyon','Nice','Marseille'], n:'法國'},
+        {k:['Italy','Rome','Milan','Venice','Florence','Naples'], n:'義大利'},
+        {k:['Germany','Berlin','Munich','Hamburg','Frankfurt'], n:'德國'},
+        {k:['Spain','Madrid','Barcelona','Seville'], n:'西班牙'},
+        {k:['Australia','Sydney','Melbourne','Brisbane','Perth'], n:'澳洲'},
+        {k:['Canada','Toronto','Vancouver','Montreal'], n:'加拿大'},
+      ];
+      for (const {k, n} of COUNTRY_MAP) {
+        if (k.some(kw => addr.includes(kw))) { county = n; break; }
+      }
+      if (!county) county = '其他';
     }
-    if (!county) county = '其他';
   }
 
   // Auto-detect category from Google Place types
@@ -1659,6 +1696,7 @@ async function selectSearchResult(i) {
     if (county) document.getElementById('addCounty').value = county;
   } else {
     if (county) document.getElementById('addCountry').value = county;
+    if (detectedCity) document.getElementById('addCity').value = detectedCity;
   }
 }
 
@@ -1803,7 +1841,7 @@ function migrateSpots() {
       changed = true;
     }
     // 若 categories 裡有 'other' 但自訂分類沒有，自動補上
-    if (updated.categories?.includes('other') && !customCats.find(c => c.id === 'other') && !DEFAULT_CATS.find(c => c.id === 'other')) {
+    if (updated.categories?.includes('other') && !customCats.find(c => c.id === 'other') && ![...DEFAULT_CATS_TW, ...DEFAULT_CATS_ABROAD].find(c => c.id === 'other')) {
       customCats.push({ id: 'other', name: '其他', icon: 'pin' });
       catsChanged = true;
     }
