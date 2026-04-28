@@ -6,6 +6,7 @@
 <title>我的收藏</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
 /* ── Theme ── */
 :root {
@@ -93,13 +94,13 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .grid { padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-content: start; }
 
 /* ── Card ── */
-.card { background: var(--color-card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; position: relative; }
+.card { background: var(--color-card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; position: relative; height: 380px; display: flex; flex-direction: column; }
 .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
 .card.dragging { opacity: 0.4; transform: scale(0.97); }
 .card.drag-over { outline: 2px dashed var(--color-primary); }
 
 /* Card image wrapper */
-.card-img-wrap { position: relative; height: 200px; overflow: hidden; }
+.card-img-wrap { position: relative; height: 200px; overflow: hidden; flex-shrink: 0; }
 .card-img { width: 100%; height: 200px; object-fit: cover; display: block; }
 .card-ph { width: 100%; height: 200px; background: #DDE4EA; display: flex; align-items: center; justify-content: center; }
 .card-ph svg { width: 36px; height: 36px; stroke: #A8B8C4; fill: none; stroke-width: 1.2; }
@@ -114,15 +115,15 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .card-fav-btn.active svg { fill: var(--color-heart); }
 
 /* Card body */
-.card-body { padding: 14px 16px; }
+.card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
 .card-name { font-size: 16px; font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
-.card-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; }
+.card-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; min-height: 24px; }
 .card-rating-score { font-size: 13px; font-weight: 700; color: var(--color-text); }
 .card-rating-count { font-size: 12px; color: var(--color-text-secondary); }
-.card-addr { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-addr { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 20px; }
 
 /* Card footer — 3 icons, equal spacing */
-.card-footer { border-top: 1px solid var(--color-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-around; }
+.card-footer { border-top: 1px solid var(--color-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; }
 .card-icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; text-decoration: none; flex-shrink: 0; }
 .card-icon-btn:hover { background: var(--color-bg); }
 .card-icon-btn.maps-btn:hover { background: #E8F0FE; }
@@ -138,8 +139,8 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .detail-pill { font-size: 11px; font-weight: 500; border: none; border-radius: 20px; padding: 3px 10px; display: inline-flex; align-items: center; line-height: 1; }
 
 /* Card note & trip tags */
-.card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.card-trips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.card-trips { display: flex; flex-wrap: nowrap; gap: 4px; margin-top: 6px; overflow: hidden; }
 .card-trip-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; background: rgba(61,170,140,0.12); color: var(--color-primary); line-height: 1.6; }
 
 /* Sidebar bottom actions */
@@ -747,20 +748,20 @@ const SVG = {
 };
 
 const DEFAULT_CATS_TW = [
-  { id: 'food',        name: '餐廳',     icon: 'cutlery' },
+  { id: 'food',        name: '餐廳',     icon: 'utensils' },
   { id: 'coffee',      name: '咖啡廳',   icon: 'coffee' },
-  { id: 'stay',        name: '民宿',     icon: 'home' },
-  { id: 'scene',       name: '景點',     icon: 'mountain' },
+  { id: 'stay',        name: '民宿',     icon: 'house' },
+  { id: 'scene',       name: '景點',     icon: 'binoculars' },
   { id: 'pet',         name: '寵物友善', icon: 'dog' },
-  { id: 'notimelimit', name: '不限時',   icon: 'laptop' },
+  { id: 'notimelimit', name: '不限時',   icon: 'alarm-clock' },
 ];
 const DEFAULT_CATS_ABROAD = [
-  { id: 'food',     name: '美食',   icon: 'cutlery' },
-  { id: 'scene',    name: '景點',   icon: 'mountain' },
-  { id: 'stay',     name: '住宿',   icon: 'home' },
+  { id: 'food',     name: '美食',   icon: 'utensils' },
+  { id: 'scene',    name: '景點',   icon: 'binoculars' },
+  { id: 'stay',     name: '住宿',   icon: 'house' },
   { id: 'coffee',   name: '咖啡廳', icon: 'coffee' },
-  { id: 'shopping', name: '購物',   icon: 'shopping' },
-  { id: 'dessert',  name: '甜點',   icon: 'cake' },
+  { id: 'shopping', name: '購物',   icon: 'shopping-cart' },
+  { id: 'dessert',  name: '甜點',   icon: 'cake-slice' },
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -901,54 +902,33 @@ const CAT_COLORS = {
 const DEFAULT_CAT_COLOR = { emoji: '📍', bg: '#E8E0D6' };
 
 // Flat colored SVG icons for sidebar (no background circle — just the icon itself)
-const CAT_SVG_ICONS = {
-  food: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <rect x="4.5" y="2" width="1.8" height="7" rx="0.9" fill="#E07030"/>
-    <rect x="7.8" y="2" width="1.8" height="7" rx="0.9" fill="#E07030"/>
-    <path d="M4.5 9 Q4.5 11.5 7.7 11.5 Q10.9 11.5 10.9 9" fill="#E07030"/>
-    <rect x="6.8" y="11.5" width="1.8" height="6.5" rx="0.9" fill="#E07030"/>
-    <path d="M13 2 L13 9.5 C13 11.2 15.5 11.2 15.5 9.5 L15.5 2 Z" fill="#E07030"/>
-  </svg>`,
-  coffee: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M3.5 8h10l-1.5 8H5z" fill="#8B5E30"/>
-    <path d="M13.5 10.5 C16.5 10.5 16.5 14.5 13.5 14.5" stroke="#8B5E30" stroke-width="2" stroke-linecap="round"/>
-    <rect x="2.5" y="16.5" width="12" height="1.8" rx="0.9" fill="#8B5E30"/>
-    <path d="M7 6.5 C7.5 5 8 4.5 7.5 2.5" stroke="#B07840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <path d="M10.5 6.5 C11 5 11.5 4.5 11 2.5" stroke="#B07840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-  </svg>`,
-  stay: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M2 10.5 L10 3 L18 10.5" fill="#4A90D9" stroke="#4A90D9" stroke-width="0.5" stroke-linejoin="round"/>
-    <path d="M4 9.5 L4 17 L8.5 17 L8.5 13 L11.5 13 L11.5 17 L16 17 L16 9.5 L10 4.5 Z" fill="#4A90D9"/>
-  </svg>`,
-  scene: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M1 18 L8 5 L11.5 11.5 L14 8 L19 18 Z" fill="#3DAA6A"/>
-    <circle cx="14.5" cy="5" r="2.5" fill="#FFD060"/>
-  </svg>`,
-  pet: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <ellipse cx="10" cy="13.5" rx="5" ry="4.5" fill="#CC3A98"/>
-    <ellipse cx="4.5" cy="9.5" rx="2" ry="2.6" fill="#CC3A98"/>
-    <ellipse cx="15.5" cy="9.5" rx="2" ry="2.6" fill="#CC3A98"/>
-    <ellipse cx="7" cy="6.5" rx="1.8" ry="2.3" fill="#CC3A98"/>
-    <ellipse cx="13" cy="6.5" rx="1.8" ry="2.3" fill="#CC3A98"/>
-  </svg>`,
-  notimelimit: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <circle cx="10" cy="11" r="7.5" fill="#7A52CC"/>
-    <path d="M10 7v4l2.5 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`,
-  shopping: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M4.5 7.5h11l-1.8 9.5H6.3z" fill="#CC9A20"/>
-    <path d="M7.5 7.5V5.5a2.5 2.5 0 0 1 5 0v2" stroke="#CC9A20" stroke-width="2" stroke-linecap="round"/>
-    <line x1="8" y1="11.5" x2="12" y2="11.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
-  </svg>`,
-  dessert: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <rect x="3" y="10.5" width="14" height="7.5" rx="2" fill="#CC3A5A"/>
-    <path d="M3 10.5 Q3 6 10 6 Q17 6 17 10.5Z" fill="#F06080"/>
-    <path d="M6.5 10.5 Q6.5 7.5 10 7.5 Q13.5 7.5 13.5 10.5Z" fill="#FFB0C0"/>
-    <circle cx="10" cy="7" r="1.5" fill="#FFD060"/>
-    <path d="M9.5 5 Q9.5 3 10 2" stroke="#EE6080" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>`,
+// Lucide icon name per preset category ID
+const CAT_LUCIDE_NAMES = {
+  food: 'utensils', coffee: 'coffee', stay: 'house',
+  scene: 'binoculars', pet: 'dog', notimelimit: 'alarm-clock',
+  shopping: 'shopping-cart', dessert: 'cake-slice',
 };
-const DEFAULT_CAT_SVG = `<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="#AAAAAA"/></svg>`;
+// Sidebar icon colour per preset category ID
+const CAT_LUCIDE_COLORS = {
+  food: '#E07030', coffee: '#8B5E30', stay: '#4A90D9',
+  scene: '#3DAA6A', pet: '#CC3A98', notimelimit: '#7A52CC',
+  shopping: '#CC9A20', dessert: '#CC3A5A',
+};
+// Old SVG key → Lucide name (backward compat for saved custom cats)
+const ICON_LEGACY_MAP = {
+  cutlery: 'utensils', home: 'house', mountain: 'mountain',
+  laptop: 'alarm-clock', shopping: 'shopping-cart', cake: 'cake-slice',
+  pin: 'map-pin', walk: 'footprints', cat: 'cat', globe: 'globe',
+  camera: 'camera', heart: 'heart', sun: 'sun', flower: 'flower-2',
+  tree: 'tree', wine: 'wine', beer: 'beer', music: 'music',
+  dog: 'dog', coffee: 'coffee',
+};
+
+function refreshIcons() {
+  if (window.lucide) lucide.createIcons({
+    attrs: { 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }
+  });
+}
 
 // Colored pill tag styles for card category tags
 const CAT_PILL_COLORS = {
@@ -1006,10 +986,10 @@ function openSettings() {
   document.getElementById('setupWrap').style.display = 'flex';
 }
 
-// ── Cat icon SVG ───────────────────────────────────────────────────────────
+// ── Cat icon (Lucide) ──────────────────────────────────────────────────────
 function catIconSVG(cat, size = 13) {
-  const icon = SVG[cat.icon] || SVG.pin;
-  return icon.replace('<svg', `<svg width="${size}" height="${size}" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"`);
+  const name = ICON_LEGACY_MAP[cat.icon] || cat.icon || 'map-pin';
+  return `<i data-lucide="${name}" width="${size}" height="${size}" style="display:inline-block;vertical-align:middle;flex-shrink:0"></i>`;
 }
 
 // ── Trip functions ─────────────────────────────────────────────────────────
@@ -1037,18 +1017,19 @@ function renderTripFilter() {
   const sidebarHtml = trips.map(t => {
     const isOn = currentTripFilter === t.id;
     return `<button class="cat-item${isOn ? ' active' : ''}" onclick="toggleTripFilter('${t.id}')">
-      <span class="cat-icon" style="font-size:15px">🗺</span>
+      <span class="cat-icon"><i data-lucide="map-pinned" width="20" height="20" stroke="#3DAA8C"></i></span>
       <span class="cat-name">${t.name}</span>
     </button>`;
   }).join('') +
   `<button class="cat-item" onclick="openTripModal()" style="opacity:0.6">
-    <span class="cat-icon" style="font-size:18px;color:var(--color-text-secondary)">＋</span>
+    <span class="cat-icon"><i data-lucide="plus" width="18" height="18" stroke="var(--color-text-secondary)"></i></span>
     <span class="cat-name" style="font-size:12px;color:var(--color-text-secondary)">管理行程</span>
   </button>`;
 
   if (sec) { sec.style.display = 'flex'; sec.innerHTML = sidebarHtml; }
   if (secMobile) { secMobile.style.display = 'flex'; secMobile.innerHTML = mobileHtml; }
   if (sbLabel) sbLabel.style.display = 'block';
+  refreshIcons();
 }
 
 function toggleTripFilter(id) {
@@ -1210,22 +1191,24 @@ function renderFilters() {
       const isCustom = customCats.find(x => x.id === c.id);
       const count = spots.filter(s => s.categories?.includes(c.id)).length;
       const isOn = currentFilters.includes(c.id);
-      const icon = CAT_SVG_ICONS[c.id] || DEFAULT_CAT_SVG;
+      const lucideName = CAT_LUCIDE_NAMES[c.id] || ICON_LEGACY_MAP[c.icon] || c.icon || 'map-pin';
+      const iconColor = CAT_LUCIDE_COLORS[c.id] || '#888888';
       return `<button class="cat-item${isOn ? ' active' : ''}" onclick="toggleFilter('${c.id}')">
-        <span class="cat-icon">${icon}</span>
+        <span class="cat-icon"><i data-lucide="${lucideName}" width="20" height="20" stroke="${iconColor}"></i></span>
         <span class="cat-name">${c.name}</span>
         ${count ? `<span class="cat-count">${count}</span>` : ''}
         ${isCustom ? `<span class="ftag-del" onclick="event.stopPropagation();deleteCustomCat('${c.id}')" title="刪除">×</span>` : ''}
       </button>`;
     }).join('') +
     `<button class="cat-item" onclick="openCatModal()" style="opacity:0.6">
-      <span class="cat-icon" style="font-size:18px;color:var(--color-text-secondary)">＋</span>
+      <span class="cat-icon"><i data-lucide="plus" width="18" height="18" stroke="var(--color-text-secondary)"></i></span>
       <span class="cat-name" style="font-size:12px;color:var(--color-text-secondary)">新增分類</span>
     </button>`;
 
   document.getElementById('filterSection').innerHTML = sidebarHtml;
   const mobile = document.getElementById('filterSectionMobile');
   if (mobile) mobile.innerHTML = mobileHtml;
+  refreshIcons();
 }
 
 function clearCatFilters() {
@@ -1296,6 +1279,7 @@ function renderMain() {
     list.forEach(s => grid.appendChild(makeCard(s)));
   }
   content.appendChild(grid);
+  refreshIcons();
 }
 
 function renderCountyView(content) {
@@ -1334,6 +1318,7 @@ function renderCountyView(content) {
     sec.appendChild(group);
   });
   content.appendChild(sec);
+  refreshIcons();
 }
 
 function renderCountryView(content) {
@@ -1391,6 +1376,7 @@ function renderCountryView(content) {
     sec.appendChild(group);
   });
   content.appendChild(sec);
+  refreshIcons();
 }
 
 function makeCard(s) {
@@ -1699,6 +1685,7 @@ function openDetail(id) {
   if (hasPic) {
     setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
   }
+  refreshIcons();
 }
 
 
@@ -1711,6 +1698,7 @@ function renderDetailCats(initial) {
     <button class="cat-pick ${detailSelectedCats.includes(c.id) ? 'on' : ''}" onclick="toggleDetailCat('${c.id}')">
       ${catIconSVG(c, 12)} ${c.name}
     </button>`).join('');
+  refreshIcons();
 }
 function toggleDetailCat(id) {
   if (detailSelectedCats.includes(id)) detailSelectedCats = detailSelectedCats.filter(x => x !== id);
@@ -1808,6 +1796,7 @@ function renderAddCats() {
     <button class="cat-pick ${addSelectedCats.includes(c.id) ? 'on' : ''}" onclick="toggleAddCat('${c.id}')">
       ${catIconSVG(c, 12)} ${c.name}
     </button>`).join('');
+  refreshIcons();
 }
 
 function toggleAddCat(id) {
@@ -2133,14 +2122,17 @@ async function confirmAdd() {
 
 // ── Custom cat ─────────────────────────────────────────────────────────────
 const ICON_OPTS = [
-  'cutlery','coffee','home','mountain','pin','dog',
-  'laptop','shopping','sun','heart','camera','cake',
-  'wine','tree','walk','flower','cat','globe',
+  'utensils','coffee','house','binoculars','dog','alarm-clock',
+  'shopping-cart','cake-slice','map-pin','map-pinned','camera',
+  'heart','star','sun','tree','mountain','flower-2','leaf',
+  'wine','beer','music','book','plane','car','train','bike',
+  'umbrella','globe','building-2','store','shirt','cat','fish',
+  'gamepad-2','flame','gem','palette',
 ];
-let selectedIcon = 'pin';
+let selectedIcon = 'map-pin';
 
 function openCatModal() {
-  selectedIcon = 'pin';
+  selectedIcon = 'map-pin';
   document.getElementById('catModal').style.display = 'flex';
   document.getElementById('catModalInput').value = '';
   renderIconPicker();
@@ -2150,8 +2142,9 @@ function openCatModal() {
 function renderIconPicker() {
   document.getElementById('iconPicker').innerHTML = ICON_OPTS.map(key => `
     <button class="icon-opt ${selectedIcon === key ? 'on' : ''}" onclick="pickIcon('${key}')">
-      ${(SVG[key] || SVG.pin).replace('<svg', '<svg width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')}
+      <i data-lucide="${key}" width="16" height="16" style="display:block"></i>
     </button>`).join('');
+  refreshIcons();
 }
 
 function pickIcon(key) { selectedIcon = key; renderIconPicker(); }
