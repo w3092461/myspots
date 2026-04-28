@@ -1992,6 +1992,8 @@ function openAddModal() {
   addSelectedTrips = [];
   renderAddTrips();
   document.getElementById('acList').style.display = 'none';
+  currentSessionToken = crypto.randomUUID();
+  acSelected = false;
   document.getElementById('addOverlay').classList.add('open');
   setTimeout(() => document.getElementById('addSearch').focus(), 300);
 }
@@ -2023,8 +2025,11 @@ function setAddProgress(pct, msg, isErr) {
 let acTimer = null;
 let acFocusIdx = -1;
 let acSuggestions = [];
+let currentSessionToken = null;
+let acSelected = false;
 
 function onAcInput() {
+  if (acSelected) return;
   const q = document.getElementById('addSearch').value.trim();
   clearTimeout(acTimer);
   acFocusIdx = -1;
@@ -2039,7 +2044,7 @@ async function fetchAc(q) {
     const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key },
-      body: JSON.stringify({ input: q, languageCode: 'zh-TW', includedPrimaryTypes: [] })
+      body: JSON.stringify({ input: q, languageCode: 'zh-TW', includedPrimaryTypes: [], sessionToken: currentSessionToken })
     });
     if (!res.ok) return;
     const data = await res.json();
@@ -2075,6 +2080,7 @@ function selectAc(i) {
   const p = s.placePrediction;
   const name = p?.structuredFormat?.mainText?.text || p?.text?.text || '';
   document.getElementById('addSearch').value = name;
+  acSelected = true;
   hideAc();
   doSearch();
 }
@@ -2302,6 +2308,7 @@ async function selectSearchResult(i) {
     if (county) document.getElementById('addCountry').value = county;
     if (detectedCity) document.getElementById('addCity').value = detectedCity;
   }
+  currentSessionToken = null;
 }
 
 
@@ -2418,7 +2425,10 @@ function handleImport(e) {
 }
 
 // ── Overlay ────────────────────────────────────────────────────────────────
-function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'addOverlay') { currentSessionToken = null; acSelected = false; }
+}
 function handleOverlay(e, id) { if (e.target.id === id) closeOverlay(id); }
 
 // ── Migrate old data ───────────────────────────────────────────────────────
