@@ -9,23 +9,25 @@
 <style>
 /* ── Theme ── */
 :root {
-  --bg: #ffffff; --bg2: #f5f5f5; --bg3: #ebebeb;
-  --card: #ffffff; --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.15);
-  --text: #111111; --text2: #555555; --text3: #999999;
-  --accent: #111111; --accent2: #444444;
-  --gold: #111111; --visited: #bbbbbb;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --radius: 8px;
-  --accent-color: #45A87A;
-  --accent2-color: #2e9e6b;
+  --bg: #EFF4EC; --bg2: #E4EDE0; --bg3: #D6E3D1;
+  --sidebar-bg: #DDE9D8;
+  --card: #FFFFFF; --border: rgba(40,70,40,0.08); --border2: rgba(40,70,40,0.16);
+  --text: #1E2B20; --text2: #526054; --text3: #8EA090;
+  --accent: #1E2B20; --accent2: #526054;
+  --gold: #D4881A; --visited: #A8C0AC;
+  --shadow: 0 2px 14px rgba(30,50,30,0.09);
+  --radius: 12px;
+  --accent-color: #4A8C65;
+  --accent2-color: #3A7A55;
 }
 [data-theme="dark"] {
-  --bg: #0f0f0f; --bg2: #1a1a1a; --bg3: #242424;
-  --card: #1a1a1a; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.16);
-  --text: #f0f0f0; --text2: #999999; --text3: #555555;
-  --accent: #ffffff; --accent2: #cccccc;
-  --gold: #ffffff; --visited: #555555;
-  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --bg: #0d150f; --bg2: #131d14; --bg3: #192119;
+  --sidebar-bg: #0f190f;
+  --card: #131d14; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.14);
+  --text: #e8f0ea; --text2: #8aaa8e; --text3: #4a5e4d;
+  --accent: #e8f0ea; --accent2: #a8c0ac;
+  --gold: #d4a84a; --visited: #3a5a3e;
+  --shadow: 0 2px 14px rgba(0,0,0,0.4);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.2s, color 0.2s; }
@@ -86,12 +88,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .grid { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-content: start; }
 
 /* ── Card ── */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; cursor: pointer; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s; cursor: pointer; position: relative; box-shadow: var(--shadow); }
 .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent-color); opacity: 0; transition: opacity 0.18s; z-index: 1; }
 .card:hover::before { opacity: 1; }
-.card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.card.visited { background: color-mix(in srgb, var(--accent2-color) 8%, white); border-color: color-mix(in srgb, var(--accent2-color) 25%, white); }
-[data-theme="dark"] .card.visited { background: color-mix(in srgb, var(--accent2-color) 12%, #0f0f0f); border-color: color-mix(in srgb, var(--accent2-color) 30%, #0f0f0f); }
+.card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30,50,30,0.13); }
+.card.visited { background: color-mix(in srgb, var(--accent2-color) 8%, white); border-color: color-mix(in srgb, var(--accent2-color) 22%, white); }
+[data-theme="dark"] .card.visited { background: color-mix(in srgb, var(--accent2-color) 12%, #0d150f); border-color: color-mix(in srgb, var(--accent2-color) 30%, #0d150f); }
 .card.visited .card-name { color: var(--text2); }
 .visited-stamp { position: absolute; top: 10px; right: 10px; background: var(--accent2-color); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 .visited-stamp svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -99,8 +101,8 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .fav-stamp svg { width: 11px; height: 11px; stroke: #fff; fill: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .card.dragging { opacity: 0.4; transform: scale(0.97); }
 .card.drag-over { border-color: var(--text); border-style: dashed; }
-.card-img { width: 100%; height: 165px; object-fit: cover; display: block; background: var(--bg2); }
-.card-ph { width: 100%; height: 165px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
+.card-img { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--bg2); }
+.card-ph { width: 100%; height: 180px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
 .card-ph svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
 .card-body { padding: 14px; }
 .card-top { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
@@ -108,7 +110,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .card-visited-badge { flex-shrink: 0; margin-top: 2px; }
 .card-visited-badge svg { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
 .card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
-.card-cat-tag { font-size: 11px; font-weight: 400; color: var(--text2); background: transparent; border: 1px solid var(--border2); border-radius: 10px; padding: 3px 10px; display: flex; align-items: center; gap: 3px; }
+.card-cat-tag { font-size: 11px; font-weight: 400; color: var(--text2); background: var(--bg2); border: none; border-radius: 6px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
 .card-cat-tag svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .card-addr { font-size: 11px; color: var(--text3); font-weight: 400; line-height: 1.5; margin-bottom: 8px; }
 .card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -291,6 +293,56 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .ac-item-main { font-size: 13px; color: var(--text); font-weight: 500; }
 .ac-item-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
 
+/* ── Desktop sidebar layout ── */
+.layout-wrap { display: flex; min-height: 100vh; align-items: flex-start; }
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.sidebar {
+  display: none;
+  width: 232px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border2);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-direction: column;
+  padding: 20px 14px 32px;
+}
+.sidebar::-webkit-scrollbar { width: 0; }
+
+.sb-logo { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border2); }
+.sb-logo .logo { font-size: 15px; font-weight: 700; }
+.sb-logo .logo small { font-size: 9px; letter-spacing: 0.1em; }
+.sb-region-toggle { margin-bottom: 4px; }
+.sb-region-toggle.region-toggle { background: rgba(0,0,0,0.06); }
+[data-theme="dark"] .sb-region-toggle.region-toggle { background: rgba(255,255,255,0.06); }
+.sb-stats { font-size: 12px; color: var(--text3); padding: 10px 2px 6px; display: flex; align-items: baseline; gap: 4px; }
+.sb-stats strong { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
+.sb-section-label { font-size: 10px; letter-spacing: 0.12em; color: var(--text3); text-transform: uppercase; padding: 14px 2px 6px; }
+.sb-filter-wrap { display: flex; flex-direction: column; gap: 2px; }
+.sb-filter-wrap .ftag { width: 100%; border-radius: 8px; font-size: 12px; padding: 7px 10px; justify-content: flex-start; border-color: transparent; background: transparent; }
+.sb-filter-wrap .ftag:hover { background: var(--bg3); border-color: transparent; }
+.sb-filter-wrap .ftag.on { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+.sb-filter-wrap .ftag-add { width: 100%; text-align: left; border-radius: 8px; padding: 6px 10px; }
+.sb-trip-wrap { display: flex; flex-direction: column; gap: 2px; background: transparent; border: none; padding: 0; }
+.sb-trip-wrap .trip-tag { width: 100%; border-radius: 8px; justify-content: flex-start; background: transparent; }
+.sb-trip-wrap .trip-tag:hover { background: var(--bg3); }
+.sb-trip-wrap .trip-tag.on { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+.sb-trip-wrap .trip-add { width: 100%; text-align: left; border-radius: 8px; padding: 6px 10px; }
+
+.hdr-brand { display: flex; align-items: center; gap: 12px; }
+
+@media (min-width: 900px) {
+  .sidebar { display: flex; }
+  .hdr-brand { display: none; }
+  .hdr { justify-content: flex-end; }
+  .mobile-filter { display: none !important; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .cnt { display: none; }
+}
+
 @media (max-width: 480px) {
   .grid { grid-template-columns: 1fr; padding: 12px; }
   .hdr { padding: 13px 16px 11px; }
@@ -329,12 +381,35 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   </div>
 </div>
 
+<div class="layout-wrap">
+
+<!-- SIDEBAR (desktop only) -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="logo">我的收藏 <small>MY SPOTS</small></div>
+  </div>
+  <div class="region-toggle sb-region-toggle">
+    <button class="region-btn" id="sbRegionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
+    <button class="region-btn" id="sbRegionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+  </div>
+  <div class="sb-stats" id="sbStats"></div>
+  <div class="sb-section-label">分類</div>
+  <div class="sb-filter-wrap" id="filterSection"></div>
+  <div class="sb-section-label" id="sbTripLabel" style="display:none">行程</div>
+  <div class="sb-trip-wrap" id="tripSection" style="display:none"></div>
+</aside>
+
+<!-- MAIN COLUMN -->
+<div class="main-col">
+
 <!-- Header -->
 <header class="hdr">
-  <div class="logo">我的收藏 <small>MY SPOTS</small></div>
-  <div class="region-toggle">
-    <button class="region-btn on" id="regionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
-    <button class="region-btn" id="regionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+  <div class="hdr-brand">
+    <div class="logo">我的收藏 <small>MY SPOTS</small></div>
+    <div class="region-toggle">
+      <button class="region-btn on" id="regionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
+      <button class="region-btn" id="regionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+    </div>
   </div>
   <div class="hdr-actions">
     <span class="cnt" id="cnt"></span>
@@ -372,18 +447,21 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <!-- View tabs (dynamically rendered) -->
 <div class="view-tabs" id="viewTabs"></div>
 
-<!-- Filter bar -->
-<div class="filter-section" id="filterSection"></div>
+<!-- Mobile filter bar (desktop: in sidebar) -->
+<div class="filter-section mobile-filter" id="filterSectionMobile"></div>
 
 <!-- County / Country filter bar -->
 <div class="county-filter-section" id="countyFilterSection" style="display:none"></div>
 <!-- City sub-filter bar (abroad mode only) -->
 <div class="county-filter-section" id="cityFilterSection" style="display:none"></div>
-<!-- Trip filter row -->
-<div class="trip-section" id="tripSection" style="display:none"></div>
+<!-- Mobile trip filter row (desktop: in sidebar) -->
+<div class="trip-section mobile-filter" id="tripSectionMobile" style="display:none"></div>
 
 <!-- Main content -->
 <div id="mainContent"></div>
+
+</div><!-- end main-col -->
+</div><!-- end layout-wrap -->
 
 <!-- FAB -->
 <button class="fab" onclick="openAddModal()">＋</button>
@@ -803,14 +881,24 @@ function catIconSVG(cat, size = 13) {
 // ── Trip functions ─────────────────────────────────────────────────────────
 function renderTripFilter() {
   const sec = document.getElementById('tripSection');
-  if (!trips.length) { sec.style.display = 'none'; currentTripFilter = ''; return; }
-  sec.style.display = 'flex';
-  sec.innerHTML = trips.map(t =>
+  const secMobile = document.getElementById('tripSectionMobile');
+  const sbLabel = document.getElementById('sbTripLabel');
+  if (!trips.length) {
+    if (sec) sec.style.display = 'none';
+    if (secMobile) secMobile.style.display = 'none';
+    if (sbLabel) sbLabel.style.display = 'none';
+    currentTripFilter = '';
+    return;
+  }
+  const html = trips.map(t =>
     `<button class="trip-tag ${currentTripFilter === t.id ? 'on' : ''}" onclick="toggleTripFilter('${t.id}')">
       🗺 ${t.name}
     </button>`
   ).join('') +
   `<button class="trip-add" onclick="openTripModal()">＋ 管理行程</button>`;
+  if (sec) { sec.style.display = 'flex'; sec.innerHTML = html; }
+  if (secMobile) { secMobile.style.display = 'flex'; secMobile.innerHTML = html; }
+  if (sbLabel) sbLabel.style.display = 'block';
 }
 
 function toggleTripFilter(id) {
@@ -909,8 +997,10 @@ function setRegion(r) {
   searchQuery = '';
   document.getElementById('searchBar').value = '';
   document.getElementById('searchClear').classList.remove('show');
-  document.getElementById('regionTW').classList.toggle('on', r === 'tw');
-  document.getElementById('regionAbroad').classList.toggle('on', r === 'abroad');
+  document.getElementById('regionTW')?.classList.toggle('on', r === 'tw');
+  document.getElementById('regionAbroad')?.classList.toggle('on', r === 'abroad');
+  document.getElementById('sbRegionTW')?.classList.toggle('on', r === 'tw');
+  document.getElementById('sbRegionAbroad')?.classList.toggle('on', r === 'abroad');
   renderViewTabs();
   renderFilters();
   renderMain();
@@ -936,9 +1026,7 @@ function renderViewTabs() {
 
 // ── Filter bar ─────────────────────────────────────────────────────────────
 function renderFilters() {
-  const sec = document.getElementById('filterSection');
-  const cats = allCats();
-  sec.innerHTML = cats.map(c => {
+  const html = allCats().map(c => {
     const isCustom = customCats.find(x => x.id === c.id);
     return `<button class="ftag ${currentFilters.includes(c.id) ? 'on' : ''}" onclick="toggleFilter('${c.id}')">
       ${catIconSVG(c)} ${c.name}
@@ -947,6 +1035,9 @@ function renderFilters() {
   }).join('') +
     `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>` +
     `<button class="ftag-add" onclick="openTripModal()">🗺 行程</button>`;
+  document.getElementById('filterSection').innerHTML = html;
+  const mobile = document.getElementById('filterSectionMobile');
+  if (mobile) mobile.innerHTML = html;
 }
 
 function toggleFilter(id) {
@@ -983,6 +1074,8 @@ function getFilteredSpots() {
 function renderMain() {
   const content = document.getElementById('mainContent');
   document.getElementById('cnt').textContent = spots.length + ' 個地點';
+  const sbStats = document.getElementById('sbStats');
+  if (sbStats) sbStats.innerHTML = `<strong>${spots.length}</strong> 個地點`;
   renderTripFilter();
 
   if (region === 'tw') {
@@ -1864,8 +1957,10 @@ applyAccent2(accent2Color, false);
 applyTheme();
 migrateSpots();
 checkSetup();
-document.getElementById('regionTW').classList.toggle('on', region === 'tw');
-document.getElementById('regionAbroad').classList.toggle('on', region === 'abroad');
+document.getElementById('regionTW')?.classList.toggle('on', region === 'tw');
+document.getElementById('regionAbroad')?.classList.toggle('on', region === 'abroad');
+document.getElementById('sbRegionTW')?.classList.toggle('on', region === 'tw');
+document.getElementById('sbRegionAbroad')?.classList.toggle('on', region === 'abroad');
 renderViewTabs();
 renderFilters();
 renderMain();
