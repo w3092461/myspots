@@ -147,8 +147,13 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 /* Detail pill tags (used in detail sheet) */
 .detail-pill { font-size: 11px; font-weight: 500; border: none; border-radius: 20px; padding: 3px 10px; display: inline-flex; align-items: center; line-height: 1; }
 
-/* Legacy compat */
-.card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Card note & trip tags */
+.card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-trips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.card-trip-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; background: rgba(61,170,140,0.12); color: var(--color-primary); line-height: 1.6; }
+
+/* Sidebar bottom actions */
+.sb-actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border); display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
 
 /* ── Empty ── */
 .empty { grid-column: 1/-1; text-align: center; padding: 72px 20px; }
@@ -477,6 +482,21 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <div class="sb-filter-wrap" id="sbAreaSection" style="display:none"></div>
   <div class="sb-section-label" id="sbTripLabel" style="display:none">行程</div>
   <div class="sb-trip-wrap" id="tripSection" style="display:none"></div>
+  <div class="sb-actions">
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題" id="sbThemeBtn">☀</button>
+    <button class="icon-btn" onclick="exportData()" title="匯出備份 JSON">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="icon-btn" onclick="openKmlModal()" title="匯出 KML">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+    </button>
+    <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="匯入資料">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 8 12 3 17 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </button>
+    <button class="icon-btn" onclick="openSettings()" title="設定 API Key">
+      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
 </aside>
 
 <!-- MAIN COLUMN -->
@@ -1000,7 +1020,10 @@ function resetAccent2() {
 // ── Theme ──────────────────────────────────────────────────────────────────
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('themeBtn').textContent = theme === 'dark' ? '☀' : '🌙';
+  const icon = theme === 'dark' ? '☀' : '🌙';
+  document.getElementById('themeBtn').textContent = icon;
+  const sbBtn = document.getElementById('sbThemeBtn');
+  if (sbBtn) sbBtn.textContent = icon;
   localStorage.setItem('myspots_theme', theme);
 }
 function toggleTheme() {
@@ -1435,6 +1458,12 @@ function makeCard(s) {
   const mapsQuery = encodeURIComponent((s.name || '') + (s.address ? ' ' + s.address : ''));
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
+  // Trip tags
+  const spotTrips = (s.trips || []).map(tid => trips.find(t => t.id === tid)).filter(Boolean);
+  const tripTagsHtml = spotTrips.length
+    ? `<div class="card-trips">${spotTrips.map(t => `<span class="card-trip-tag">${t.name}</span>`).join('')}</div>`
+    : '';
+
   const photoHtml = (s.photoData || s.photoUrl)
     ? `<img class="card-img" src="${s.photoData || s.photoUrl}" loading="lazy" onerror="this.style.display='none'" style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">`
     : `<div class="card-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A8B8C4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>`;
@@ -1451,6 +1480,8 @@ function makeCard(s) {
       <div class="card-name">${s.name}</div>
       ${ratingHtml}
       ${s.address ? `<div class="card-addr">${s.address}</div>` : ''}
+      ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
+      ${tripTagsHtml}
     </div>
     <div class="card-footer">
       <button class="card-icon-btn${s.favourited ? ' heart-on' : ''}" onclick="event.stopPropagation();toggleFav('${s.id}')">
@@ -1980,12 +2011,22 @@ async function selectSearchResult(i) {
       if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
     }
   } else {
-    // 國外：優先使用 addressComponents，fallback 到文字比對
+    // 國外：優先使用 addressComponents（ISO 國碼最可靠），fallback 到文字比對
+    // Places API (New) 用 longText/shortText；舊版 API 用 longName/shortName，兩者都接受
+    const COUNTRY_ISO_MAP = {
+      'JP':'日本','KR':'韓國','HK':'香港','SG':'新加坡','TH':'泰國','VN':'越南',
+      'US':'美國','GB':'英國','FR':'法國','IT':'義大利','DE':'德國','ES':'西班牙',
+      'AU':'澳洲','CA':'加拿大','TW':'台灣','CN':'中國','MO':'澳門',
+      'NL':'荷蘭','BE':'比利時','CH':'瑞士','AT':'奧地利','PT':'葡萄牙','GR':'希臘',
+      'CZ':'捷克','HU':'匈牙利','PL':'波蘭','SE':'瑞典','NO':'挪威','DK':'丹麥','FI':'芬蘭',
+      'NZ':'紐西蘭','MY':'馬來西亞','ID':'印尼','PH':'菲律賓','IN':'印度',
+      'AE':'阿聯酋','TR':'土耳其','MX':'墨西哥','BR':'巴西','AR':'阿根廷',
+    };
     const COUNTRY_NAME_MAP = {
       'Japan':'日本','South Korea':'韓國','Hong Kong':'香港','Singapore':'新加坡',
       'Thailand':'泰國','Vietnam':'越南','United States':'美國','United Kingdom':'英國',
       'France':'法國','Italy':'義大利','Germany':'德國','Spain':'西班牙',
-      'Australia':'澳洲','Canada':'加拿大','Taiwan':'台灣','China':'中國',
+      'Australia':'澳洲','Canada':'加拿大','Taiwan':'台灣','China':'中國','Macau':'澳門',
       'Netherlands':'荷蘭','Belgium':'比利時','Switzerland':'瑞士','Austria':'奧地利',
       'Portugal':'葡萄牙','Greece':'希臘','Czech Republic':'捷克','Hungary':'匈牙利',
       'Poland':'波蘭','Sweden':'瑞典','Norway':'挪威','Denmark':'丹麥','Finland':'芬蘭',
@@ -1999,24 +2040,35 @@ async function selectSearchResult(i) {
     const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
 
     if (countryComp) {
-      county = COUNTRY_NAME_MAP[countryComp.longName] || COUNTRY_NAME_MAP[countryComp.shortName] || countryComp.longName || '其他';
-      detectedCity = cityComp?.longName || '';
+      const isoCode  = countryComp.shortText || countryComp.shortName || '';
+      const longText = countryComp.longText  || countryComp.longName  || '';
+      county = COUNTRY_ISO_MAP[isoCode] || COUNTRY_NAME_MAP[longText] || longText || '其他';
+      detectedCity = cityComp?.longText || cityComp?.longName || '';
     } else {
-      // fallback：關鍵字比對（含城市名）
+      // fallback：關鍵字比對（addressComponents 缺席時才走這裡）
       const COUNTRY_MAP = [
-        {k:['Japan','〒','Tokyo','Osaka','Kyoto','Fukuoka','Sapporo','Nagoya','Hiroshima','Yokohama','Kobe','Nara','Okinawa','Sendai','Hokkaido'], n:'日本'},
-        {k:['South Korea','Korea','Seoul','Busan','Incheon','Daegu','Jeju'], n:'韓國'},
-        {k:['Hong Kong'], n:'香港'}, {k:['Singapore'], n:'新加坡'},
-        {k:['Thailand','Bangkok','Chiang Mai','Phuket'], n:'泰國'},
-        {k:['Vietnam','Hanoi','Ho Chi Minh','Da Nang','Hoi An'], n:'越南'},
-        {k:['United States','USA','New York','Los Angeles','Chicago','San Francisco'], n:'美國'},
-        {k:['United Kingdom','England','London','Manchester','Edinburgh'], n:'英國'},
-        {k:['France','Paris','Lyon','Nice','Marseille'], n:'法國'},
-        {k:['Italy','Rome','Milan','Venice','Florence','Naples'], n:'義大利'},
-        {k:['Germany','Berlin','Munich','Hamburg','Frankfurt'], n:'德國'},
-        {k:['Spain','Madrid','Barcelona','Seville'], n:'西班牙'},
-        {k:['Australia','Sydney','Melbourne','Brisbane','Perth'], n:'澳洲'},
-        {k:['Canada','Toronto','Vancouver','Montreal'], n:'加拿大'},
+        {k:['Japan','日本','〒','Tokyo','Osaka','Kyoto','Fukuoka','Sapporo','Nagoya','Hiroshima',
+            'Yokohama','Kobe','Nara','Okinawa','Sendai','Hokkaido','Aomori','Akita','Iwate',
+            'Yamagata','Miyagi','Niigata','Kanagawa','Chiba','Saitama','Gunma','Tochigi',
+            'Ibaraki','Yamanashi','Nagano','Shizuoka','Aichi','Mie','Shiga','Hyogo','Wakayama',
+            'Tottori','Shimane','Okayama','Yamaguchi','Tokushima','Kagawa','Ehime','Kochi',
+            'Saga','Nagasaki','Kumamoto','Oita','Miyazaki','Kagoshima','Hakata','Ward'], n:'日本'},
+        {k:['South Korea','Korea','한국','Seoul','Busan','Incheon','Daegu','Jeju','Daejeon','Gwangju'], n:'韓國'},
+        {k:['Hong Kong','香港'], n:'香港'},
+        {k:['Singapore','新加坡'], n:'新加坡'},
+        {k:['Thailand','Bangkok','Chiang Mai','Phuket','Pattaya'], n:'泰國'},
+        {k:['Vietnam','Hanoi','Ho Chi Minh','Da Nang','Hoi An','Nha Trang'], n:'越南'},
+        {k:['United States','USA','New York','Los Angeles','Chicago','San Francisco','Seattle','Las Vegas','Hawaii'], n:'美國'},
+        {k:['United Kingdom','England','London','Manchester','Edinburgh','Birmingham'], n:'英國'},
+        {k:['France','Paris','Lyon','Nice','Marseille','Bordeaux','Strasbourg'], n:'法國'},
+        {k:['Italy','Rome','Milan','Venice','Florence','Naples','Turin'], n:'義大利'},
+        {k:['Germany','Berlin','Munich','Hamburg','Frankfurt','Cologne'], n:'德國'},
+        {k:['Spain','Madrid','Barcelona','Seville','Valencia'], n:'西班牙'},
+        {k:['Australia','Sydney','Melbourne','Brisbane','Perth','Adelaide'], n:'澳洲'},
+        {k:['Canada','Toronto','Vancouver','Montreal','Calgary'], n:'加拿大'},
+        {k:['Malaysia','Kuala Lumpur','Penang','Langkawi','Kota Kinabalu'], n:'馬來西亞'},
+        {k:['Indonesia','Bali','Jakarta','Yogyakarta'], n:'印尼'},
+        {k:['Philippines','Manila','Cebu','Palawan','Boracay'], n:'菲律賓'},
       ];
       for (const {k, n} of COUNTRY_MAP) {
         if (k.some(kw => addr.includes(kw))) { county = n; break; }
