@@ -477,8 +477,10 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <div class="sb-stats" id="sbStats"></div>
   <div class="sb-section-label">分類</div>
   <div class="sb-filter-wrap" id="filterSection"></div>
-  <div class="sb-section-label" id="sbAreaLabel" style="display:none">地區</div>
+  <div class="sb-section-label" id="sbAreaLabel" style="display:none">國家</div>
   <div class="sb-filter-wrap" id="sbAreaSection" style="display:none"></div>
+  <div class="sb-section-label" id="sbCityLabel" style="display:none">城市</div>
+  <div class="sb-filter-wrap" id="sbCitySection" style="display:none"></div>
   <div class="sb-section-label" id="sbTripLabel" style="display:none">行程</div>
   <div class="sb-trip-wrap" id="tripSection" style="display:none"></div>
   <div class="sb-actions">
@@ -1169,6 +1171,7 @@ function renderViewTabs() {
     tabs.innerHTML = `
       <button class="view-tab ${v==='all'?'on':''}" onclick="setView('all',this)">全部</button>
       <button class="view-tab ${v==='country'?'on':''}" onclick="setView('country',this)">國家</button>
+      <button class="view-tab ${v==='city'?'on':''}" onclick="setView('city',this)">城市</button>
       <button class="view-tab ${v==='fav'?'on':''}" onclick="setView('fav',this)">精選</button>
       <button class="view-tab ${v==='visited'?'on':''}" onclick="setView('visited',this)">已去過</button>`;
   }
@@ -1275,12 +1278,14 @@ function renderMain() {
 
   if (region === 'tw') {
     renderCountyFilters();
+    renderSidebarCity([]);
     document.getElementById('cityFilterSection').style.display = 'none';
     if (currentView === 'county') { renderCountyView(content); return; }
   } else {
     document.getElementById('countyFilterSection').style.display = 'none';
     renderAbroadFilters();
     if (currentView === 'country') { renderCountryView(content); return; }
+    if (currentView === 'city') { renderCityView(content); return; }
   }
 
   content.innerHTML = '';
@@ -1391,6 +1396,50 @@ function renderCountryView(content) {
       items.forEach(s => grid.appendChild(makeCard(s)));
       group.appendChild(grid);
     }
+    sec.appendChild(group);
+  });
+  content.appendChild(sec);
+  refreshIcons();
+}
+
+function renderCityView(content) {
+  const list = getFilteredSpots();
+  const groups = {};
+  list.forEach(s => {
+    const key = s.city || '（未分城市）';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  content.innerHTML = '';
+  if (!Object.keys(groups).length) {
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.innerHTML = `<div class="empty">
+      ${SVG.map.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"')}
+      <div class="empty-title">${spots.length === 0 ? '還沒有國外收藏' : '沒有符合的地點'}</div>
+    </div>`;
+    content.appendChild(grid);
+    return;
+  }
+
+  const sec = document.createElement('div');
+  sec.className = 'county-section';
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    if (a === '（未分城市）') return 1;
+    if (b === '（未分城市）') return -1;
+    return a.localeCompare(b, 'zh-TW');
+  });
+  sortedKeys.forEach(city => {
+    const items = groups[city];
+    const group = document.createElement('div');
+    group.className = 'county-group';
+    group.innerHTML = `<div class="county-title">${city} <span class="county-count">${items.length} 個地點</span></div>`;
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.style.cssText = 'padding:0;margin-top:8px';
+    items.forEach(s => grid.appendChild(makeCard(s)));
+    group.appendChild(grid);
     sec.appendChild(group);
   });
   content.appendChild(sec);
@@ -1520,15 +1569,25 @@ function setCountyFilter(c) {
 
 function renderAbroadFilters() {
   const sec = document.getElementById('countyFilterSection');
+  const citySec = document.getElementById('cityFilterSection');
   const countries = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
-  if (!countries.length || currentView !== 'country') { sec.style.display = 'none'; document.getElementById('cityFilterSection').style.display = 'none'; renderSidebarArea([]); return; }
+  const isGroupedView = currentView === 'country' || currentView === 'city';
+
+  if (!countries.length || !isGroupedView) {
+    sec.style.display = 'none';
+    citySec.style.display = 'none';
+    renderSidebarArea([]);
+    renderSidebarCity([]);
+    return;
+  }
+
+  // Top horizontal country filter bar (both country & city views)
   sec.style.display = 'flex';
   sec.innerHTML = `<button class="county-ftag ${!countryFilter?'on':''}" onclick="setCountryFilter('')">全部</button>` +
     countries.map(c => `<button class="county-ftag ${countryFilter===c?'on':''}" onclick="setCountryFilter('${c}')">${c}</button>`).join('');
-  renderSidebarArea(countries, true);
 
-  const citySec = document.getElementById('cityFilterSection');
-  if (countryFilter) {
+  // City sub-filter bar: only in 'country' view when a country is selected
+  if (currentView === 'country' && countryFilter) {
     const cities = [...new Set(spots.filter(s => s.county === countryFilter && s.city).map(s => s.city))].sort();
     if (cities.length) {
       citySec.style.display = 'flex';
@@ -1536,6 +1595,36 @@ function renderAbroadFilters() {
         cities.map(c => `<button class="county-ftag ${abroadCityFilter===c?'on':''}" onclick="setAbroadCityFilter('${c}')">${c}</button>`).join('');
     } else { citySec.style.display = 'none'; }
   } else { citySec.style.display = 'none'; }
+
+  // Sidebar countries
+  renderSidebarArea(countries, true);
+
+  // Sidebar cities — scoped to selected country if any
+  const cityPool = countryFilter
+    ? spots.filter(s => s.county === countryFilter && s.city)
+    : spots.filter(s => s.city);
+  const allCities = [...new Set(cityPool.map(s => s.city))].sort();
+  renderSidebarCity(allCities);
+}
+
+function renderSidebarCity(cities) {
+  const label = document.getElementById('sbCityLabel');
+  const wrap = document.getElementById('sbCitySection');
+  if (!label || !wrap) return;
+  if (!cities.length) { label.style.display = 'none'; wrap.style.display = 'none'; return; }
+  label.style.display = 'block'; wrap.style.display = 'flex';
+  wrap.innerHTML =
+    `<button class="area-item${!abroadCityFilter ? ' active' : ''}" onclick="setAbroadCityFilter('')">
+      <span>全部</span>
+      <span class="area-count">${(countryFilter ? spots.filter(s=>s.county===countryFilter) : spots).length}</span>
+    </button>` +
+    cities.map(c => {
+      const cnt = spots.filter(s => s.city === c && (!countryFilter || s.county === countryFilter)).length;
+      return `<button class="area-item${abroadCityFilter === c ? ' active' : ''}" onclick="setAbroadCityFilter('${c.replace(/'/g,"\\'")}')">
+        <span>${c}</span>
+        ${cnt ? `<span class="area-count">${cnt}</span>` : ''}
+      </button>`;
+    }).join('');
 }
 
 function setCountryFilter(c) { countryFilter = c; abroadCityFilter = ''; renderAbroadFilters(); renderMain(); }
@@ -1670,6 +1759,11 @@ function openDetail(id) {
       <div class="field"><label>分類</label>
         <div class="cat-picks" id="detailCatPicks"></div>
       </div>
+      ${region === 'abroad' ? `
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label>國家</label><input class="input" id="editCounty" placeholder="日本" value="${s.county || ''}" /></div>
+        <div><label>城市</label><input class="input" id="editCity" placeholder="東京" value="${s.city || ''}" /></div>
+      </div>` : ''}
       <div class="field"><label>備註</label>
         <textarea class="input" id="editNote" placeholder="推薦理由、必點、注意事項...">${s.note || ''}</textarea>
       </div>
@@ -1750,6 +1844,10 @@ function saveDetail(id) {
   if (!s) return;
   s.note = document.getElementById('editNote').value.trim();
   s.sourceUrl = document.getElementById('editLink').value.trim();
+  const editCounty = document.getElementById('editCounty');
+  const editCity = document.getElementById('editCity');
+  if (editCounty) s.county = editCounty.value.trim();
+  if (editCity) s.city = editCity.value.trim();
   s.categories = [...detailSelectedCats];
   s.trips = [...detailSelectedTrips];
   if (detailCustomPhoto) {
