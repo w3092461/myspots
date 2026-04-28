@@ -235,6 +235,11 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .detail-row a { color: var(--text); text-decoration: underline; word-break: break-all; }
 .detail-note { background: var(--bg2); border-radius: 8px; padding: 12px; font-size: 13px; color: var(--text2); line-height: 1.7; font-style: italic; margin-bottom: 10px; }
 .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.enrich-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(61,170,140,0.08); border: 1px solid rgba(61,170,140,0.20); border-radius: 10px; padding: 10px 14px; margin: 12px 0 0; }
+.enrich-hint { font-size: 12px; color: var(--color-text-secondary); }
+.enrich-btn { padding: 7px 14px; background: var(--color-primary); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit; transition: opacity 0.15s; }
+.enrich-btn:hover { opacity: 0.85; }
+.enrich-btn:disabled { opacity: 0.4; cursor: default; }
 .detail-btn { flex: 1; min-width: 120px; padding: 11px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 9px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .detail-btn:hover { border-color: var(--text); color: var(--text); }
 .detail-btn.danger:hover { border-color: #e05555; color: #e05555; }
@@ -1644,6 +1649,12 @@ function openDetail(id) {
     ${s.sourceUrl ? `<div class="detail-row">${SVG.link.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <a href="${s.sourceUrl}" target="_blank">查看原始貼文</a></div>` : ''}
     ${s.note ? `<div class="detail-note">${s.note}</div>` : ''}
 
+    ${(!s.address || (!s.photoData && !s.photoUrl)) ? `
+    <div class="enrich-bar">
+      <span class="enrich-hint">地址或照片資料不完整</span>
+      <button class="enrich-btn" id="enrichBtn" onclick="event.stopPropagation();enrichSpot('${id}')">🔍 自動補齊</button>
+    </div>` : ''}
+
     <div class="detail-actions">
       ${s.mapsUrl ? `<a class="detail-btn" href="${s.mapsUrl}" target="_blank">${SVG.map.replace('<svg', '<svg width="13" height="13" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} Google Maps</a>` : ''}
       <button class="detail-btn ${s.favourited ? 'visited-on' : ''}" onclick="toggleFav('${id}');openDetail('${id}')">
@@ -1753,6 +1764,83 @@ function saveDetail(id) {
   }
   save(); renderMain();
   closeOverlay('detailOverlay');
+}
+
+async function enrichSpot(id) {
+  const s = spots.find(x => x.id === id);
+  if (!s) return;
+  const key = getKey();
+  if (!key) { openSettings(); return; }
+
+  const btn = document.getElementById('enrichBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '搜尋中...'; }
+
+  try {
+    // If mapsUrl contains coordinates, use as location bias for better precision
+    const coordMatch = s.mapsUrl?.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    const body = { textQuery: s.name, languageCode: 'zh-TW', pageSize: 1 };
+    if (coordMatch) {
+      body.locationBias = { circle: {
+        center: { latitude: parseFloat(coordMatch[1]), longitude: parseFloat(coordMatch[2]) },
+        radius: 300
+      }};
+    }
+
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.photos,places.addressComponents,places.location'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error((await res.json()).error?.message || 'API 錯誤');
+    const data = await res.json();
+    const place = data.places?.[0];
+    if (!place) throw new Error(`找不到「${s.name}」，請手動確認店名`);
+
+    const addr = place.formattedAddress || '';
+    if (addr && !s.address) s.address = addr;
+    if (place.rating && !s.rating) { s.rating = place.rating; s.reviewCount = place.userRatingCount || null; }
+    if (place.photos?.length && !s.photoData && !s.photoUrl) {
+      s.photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
+    }
+    if (place.location && !s.lat) { s.lat = place.location.latitude; s.lng = place.location.longitude; }
+
+    // Country / city detection (only fill if currently empty)
+    if (!s.county || !s.city) {
+      const components = place.addressComponents || [];
+      const getComp = type => components.find(c => c.types?.includes(type));
+      if (region === 'tw') {
+        if (!s.county) {
+          const countyMap = [['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],['金門縣'],['連江縣']];
+          for (const variants of countyMap) {
+            if (variants.some(v => addr.includes(v))) { s.county = variants[0]; break; }
+          }
+        }
+      } else {
+        const ISO = {'JP':'日本','KR':'韓國','HK':'香港','SG':'新加坡','TH':'泰國','VN':'越南','US':'美國','GB':'英國','FR':'法國','IT':'義大利','DE':'德國','ES':'西班牙','AU':'澳洲','CA':'加拿大','TW':'台灣','CN':'中國','MO':'澳門','NL':'荷蘭','BE':'比利時','CH':'瑞士','AT':'奧地利','PT':'葡萄牙','GR':'希臘','CZ':'捷克','HU':'匈牙利','PL':'波蘭','SE':'瑞典','NO':'挪威','DK':'丹麥','FI':'芬蘭','NZ':'紐西蘭','MY':'馬來西亞','ID':'印尼','PH':'菲律賓','IN':'印度','AE':'阿聯酋','TR':'土耳其','MX':'墨西哥','BR':'巴西','AR':'阿根廷'};
+        const CITY={'Tokyo':'東京','Osaka':'大阪','Kyoto':'京都','Fukuoka':'福岡','Sapporo':'札幌','Nagoya':'名古屋','Hiroshima':'廣島','Yokohama':'橫濱','Kobe':'神戶','Nara':'奈良','Sendai':'仙台','Hokkaido':'北海道','Aomori':'青森','Naha':'那霸','Okinawa':'沖繩','Miyakojima':'宮古島','Ishigaki':'石垣島','Ishigakijima':'石垣島','Beppu':'別府','Kagoshima':'鹿兒島','Nagasaki':'長崎','Kumamoto':'熊本','Seoul':'首爾','Busan':'釜山','Incheon':'仁川','Jeju':'濟州','Bangkok':'曼谷','Chiang Mai':'清邁','Phuket':'普吉','Hanoi':'河內','Ho Chi Minh City':'胡志明市','Da Nang':'峴港','Hoi An':'會安','Kuala Lumpur':'吉隆坡','Penang':'檳城','Bali':'峇里島','Jakarta':'雅加達','Manila':'馬尼拉','Paris':'巴黎','London':'倫敦','Rome':'羅馬','Milan':'米蘭','Barcelona':'巴塞隆納','Amsterdam':'阿姆斯特丹','Vienna':'維也納','Prague':'布拉格','Sydney':'雪梨','Melbourne':'墨爾本','Auckland':'奧克蘭','New York':'紐約','Los Angeles':'洛杉磯','San Francisco':'舊金山','Vancouver':'溫哥華','Toronto':'多倫多'};
+        const countryComp = getComp('country');
+        const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
+        if (countryComp && !s.county) {
+          const iso = countryComp.shortText || countryComp.shortName || '';
+          const long = countryComp.longText || countryComp.longName || '';
+          s.county = ISO[iso] || long || '其他';
+        }
+        if (cityComp && !s.city) {
+          const raw = cityComp.longText || cityComp.longName || '';
+          s.city = CITY[raw] || raw;
+        }
+      }
+    }
+
+    save(); renderMain(); openDetail(id);
+  } catch(e) {
+    alert('⚠ ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 自動補齊'; }
+  }
 }
 
 async function handleDetailPhotoUpload(e) {
