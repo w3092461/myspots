@@ -9,16 +9,16 @@
 <style>
 /* ── Theme ── */
 :root {
-  --bg: #F5F1EA; --bg2: #EDE7DA; --bg3: #E3DCCB;
-  --sidebar-bg: #E8E1D2;
-  --card: #FFFFFF; --border: rgba(100,70,40,0.09); --border2: rgba(100,70,40,0.18);
-  --text: #262018; --text2: #7A6E5C; --text3: #B0A490;
-  --accent: #262018; --accent2: #7A6E5C;
-  --gold: #D4881A; --visited: #C5B89A;
-  --shadow: 0 2px 14px rgba(80,50,20,0.09);
+  --bg: #F6F4EF; --bg2: #EDEAE2; --bg3: #E2DECE;
+  --sidebar-bg: #EBF3E8;
+  --card: #FFFFFF; --border: rgba(0,0,0,0.07); --border2: rgba(0,0,0,0.13);
+  --text: #1C1C1A; --text2: #777770; --text3: #AAAAAA;
+  --accent: #1C1C1A; --accent2: #777770;
+  --gold: #D4881A; --visited: #C8E6C9;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
   --radius: 12px;
-  --accent-color: #6BAA85;
-  --accent2-color: #5A9874;
+  --accent-color: #3DAA88;
+  --accent2-color: #2E9578;
 }
 [data-theme="dark"] {
   --bg: #0d150f; --bg2: #131d14; --bg3: #192119;
@@ -34,7 +34,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 /* ── Region toggle ── */
 .region-toggle { display: flex; gap: 2px; background: var(--bg2); border-radius: 6px; padding: 2px; flex-shrink: 0; }
-.region-btn { padding: 5px 11px; border-radius: 4px; border: none; background: transparent; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.region-btn { flex: 1; padding: 5px 11px; border-radius: 4px; border: none; background: transparent; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; white-space: nowrap; text-align: center; }
 .region-btn.on { background: var(--accent-color); color: #fff; }
 
 /* ── Header ── */
@@ -101,21 +101,25 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .fav-stamp svg { width: 11px; height: 11px; stroke: #fff; fill: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .card.dragging { opacity: 0.4; transform: scale(0.97); }
 .card.drag-over { border-color: var(--text); border-style: dashed; }
-.card-img { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--bg2); }
-.card-ph { width: 100%; height: 180px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
+.card-img { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--bg2); }
+.card-ph { width: 100%; height: 200px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
 .card-ph svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
 .card-body { padding: 16px; }
 .card-top { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
 .card-name { font-family: 'Noto Sans TC', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; }
 .card-visited-badge { flex-shrink: 0; margin-top: 2px; }
 .card-visited-badge svg { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
-.card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
-.card-cat-tag { font-size: 11px; font-weight: 400; color: var(--text2); background: var(--bg2); border: none; border-radius: 6px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
-.card-cat-tag svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.card-addr { font-size: 11px; color: var(--text3); font-weight: 400; line-height: 1.5; margin-bottom: 10px; }
+.card-cats { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.card-cat-tag { font-size: 11px; font-weight: 500; border: none; border-radius: 20px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+.card-addr { font-size: 11px; color: var(--text3); font-weight: 400; line-height: 1.5; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 4px; }
+.card-addr-pin { flex-shrink: 0; margin-top: 1px; opacity: 0.5; }
 .card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .card-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text2); font-size: 10px; text-decoration: none; transition: all 0.15s; }
+.card-action-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; font-size: 11px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: 'Noto Sans TC', sans-serif; }
+.card-action-btn:hover { border-color: var(--text); color: var(--text); }
+.card-action-btn.fav-on { background: #FFF0F0; border-color: #FFAAAA; color: #E04040; }
+.card-action-btn.visited-on { background: #E8F8F0; border-color: #80CCA8; color: #2E9060; }
+.map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; color: var(--text2); font-size: 11px; text-decoration: none; transition: all 0.15s; font-weight: 500; }
 .map-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
 .map-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.5; }
 .rating { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
@@ -339,7 +343,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .sb-cat-item.on { background: var(--accent-color); }
 .sb-cat-item.on .sb-cat-name { color: #fff; font-weight: 600; }
 .sb-cat-item.on .sb-cat-count { color: rgba(255,255,255,0.7); }
-.sb-cat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.sb-cat-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; border-radius: 6px; }
 .sb-cat-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 500; }
 .sb-cat-count { font-size: 11px; color: var(--text3); }
 
@@ -824,6 +828,69 @@ const CAT_COLORS = {
 };
 const DEFAULT_CAT_COLOR = { emoji: '📍', bg: '#E8E0D6' };
 
+// Flat colored SVG icons for sidebar (no background circle — just the icon itself)
+const CAT_SVG_ICONS = {
+  food: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <rect x="4.5" y="2" width="1.8" height="7" rx="0.9" fill="#E07030"/>
+    <rect x="7.8" y="2" width="1.8" height="7" rx="0.9" fill="#E07030"/>
+    <path d="M4.5 9 Q4.5 11.5 7.7 11.5 Q10.9 11.5 10.9 9" fill="#E07030"/>
+    <rect x="6.8" y="11.5" width="1.8" height="6.5" rx="0.9" fill="#E07030"/>
+    <path d="M13 2 L13 9.5 C13 11.2 15.5 11.2 15.5 9.5 L15.5 2 Z" fill="#E07030"/>
+  </svg>`,
+  coffee: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M3.5 8h10l-1.5 8H5z" fill="#8B5E30"/>
+    <path d="M13.5 10.5 C16.5 10.5 16.5 14.5 13.5 14.5" stroke="#8B5E30" stroke-width="2" stroke-linecap="round"/>
+    <rect x="2.5" y="16.5" width="12" height="1.8" rx="0.9" fill="#8B5E30"/>
+    <path d="M7 6.5 C7.5 5 8 4.5 7.5 2.5" stroke="#B07840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M10.5 6.5 C11 5 11.5 4.5 11 2.5" stroke="#B07840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  stay: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M2 10.5 L10 3 L18 10.5" fill="#4A90D9" stroke="#4A90D9" stroke-width="0.5" stroke-linejoin="round"/>
+    <path d="M4 9.5 L4 17 L8.5 17 L8.5 13 L11.5 13 L11.5 17 L16 17 L16 9.5 L10 4.5 Z" fill="#4A90D9"/>
+  </svg>`,
+  scene: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M1 18 L8 5 L11.5 11.5 L14 8 L19 18 Z" fill="#3DAA6A"/>
+    <circle cx="14.5" cy="5" r="2.5" fill="#FFD060"/>
+  </svg>`,
+  pet: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <ellipse cx="10" cy="13.5" rx="5" ry="4.5" fill="#CC3A98"/>
+    <ellipse cx="4.5" cy="9.5" rx="2" ry="2.6" fill="#CC3A98"/>
+    <ellipse cx="15.5" cy="9.5" rx="2" ry="2.6" fill="#CC3A98"/>
+    <ellipse cx="7" cy="6.5" rx="1.8" ry="2.3" fill="#CC3A98"/>
+    <ellipse cx="13" cy="6.5" rx="1.8" ry="2.3" fill="#CC3A98"/>
+  </svg>`,
+  notimelimit: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <circle cx="10" cy="11" r="7.5" fill="#7A52CC"/>
+    <path d="M10 7v4l2.5 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  shopping: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M4.5 7.5h11l-1.8 9.5H6.3z" fill="#CC9A20"/>
+    <path d="M7.5 7.5V5.5a2.5 2.5 0 0 1 5 0v2" stroke="#CC9A20" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="11.5" x2="12" y2="11.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+  </svg>`,
+  dessert: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <rect x="3" y="10.5" width="14" height="7.5" rx="2" fill="#CC3A5A"/>
+    <path d="M3 10.5 Q3 6 10 6 Q17 6 17 10.5Z" fill="#F06080"/>
+    <path d="M6.5 10.5 Q6.5 7.5 10 7.5 Q13.5 7.5 13.5 10.5Z" fill="#FFB0C0"/>
+    <circle cx="10" cy="7" r="1.5" fill="#FFD060"/>
+    <path d="M9.5 5 Q9.5 3 10 2" stroke="#EE6080" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+};
+const DEFAULT_CAT_SVG = `<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="#AAAAAA"/></svg>`;
+
+// Colored pill tag styles for card category tags
+const CAT_PILL_COLORS = {
+  food:        { bg: '#FFF0E6', color: '#D45A10' },
+  coffee:      { bg: '#F5EDE0', color: '#7A5020' },
+  stay:        { bg: '#E6F0FA', color: '#2A68B8' },
+  scene:       { bg: '#E4F4EA', color: '#28884A' },
+  pet:         { bg: '#F8E6F4', color: '#B82A88' },
+  notimelimit: { bg: '#EEE8F8', color: '#6040C0' },
+  shopping:    { bg: '#FAF2D8', color: '#A07010' },
+  dessert:     { bg: '#F8E6EC', color: '#C02848' },
+};
+const DEFAULT_PILL_COLOR = { bg: '#F0EEE8', color: '#666660' };
+
 const DEFAULT_ACCENT = '#6BAA85';
 let accentColor = localStorage.getItem('myspots_theme_color') || DEFAULT_ACCENT;
 
@@ -1087,21 +1154,21 @@ function renderFilters() {
     `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>` +
     `<button class="ftag-add" onclick="openTripModal()">🗺 行程</button>`;
 
-  // Sidebar: emoji-badge full-width items with spot counts
+  // Sidebar: flat SVG icon + name + count (no background circle on icon)
   const sidebarHtml = cats.map(c => {
     const isCustom = customCats.find(x => x.id === c.id);
-    const cc = CAT_COLORS[c.id] || DEFAULT_CAT_COLOR;
     const count = spots.filter(s => s.categories?.includes(c.id)).length;
     const isOn = currentFilters.includes(c.id);
+    const icon = CAT_SVG_ICONS[c.id] || DEFAULT_CAT_SVG;
     return `<button class="sb-cat-item ${isOn ? 'on' : ''}" onclick="toggleFilter('${c.id}')">
-      <span class="sb-cat-icon" style="background:${isOn ? 'rgba(255,255,255,0.22)' : cc.bg}">${cc.emoji}</span>
+      <span class="sb-cat-icon">${icon}</span>
       <span class="sb-cat-name">${c.name}</span>
       ${count ? `<span class="sb-cat-count">${count}</span>` : ''}
       ${isCustom ? `<span class="ftag-del" onclick="event.stopPropagation();deleteCustomCat('${c.id}')" title="刪除分類">×</span>` : ''}
     </button>`;
   }).join('') +
     `<button class="sb-cat-item" onclick="openCatModal()">
-      <span class="sb-cat-icon" style="background:var(--bg3)">＋</span>
+      <span class="sb-cat-icon" style="font-size:18px;color:var(--text3)">＋</span>
       <span class="sb-cat-name" style="color:var(--text3);font-size:12px">新增分類</span>
     </button>`;
 
@@ -1277,12 +1344,12 @@ function makeCard(s) {
 
   const cats = (s.categories || []).map(cid => {
     const cat = allCats().find(c => c.id === cid);
-    return cat ? `<span class="card-cat-tag">${catIconSVG(cat, 10)} ${cat.name}</span>` : '';
+    if (!cat) return '';
+    const pc = CAT_PILL_COLORS[cat.id] || DEFAULT_PILL_COLOR;
+    return `<span class="card-cat-tag" style="background:${pc.bg};color:${pc.color}">${cat.name}</span>`;
   }).join('');
 
   card.innerHTML = `
-    ${s.visited ? `<div class="visited-stamp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
-    ${s.favourited ? `<div class="fav-stamp"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>` : ''}
     ${(s.photoData || s.photoUrl) ? `<img class="card-img" src="${s.photoData || s.photoUrl}" loading="lazy" onerror="this.style.display='none'" style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">` :
       `<div class="card-ph">${SVG.pin.replace('<svg', '<svg width="36" height="36" stroke="var(--text3)" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"')}</div>`}
     <div class="card-body">
@@ -1290,13 +1357,19 @@ function makeCard(s) {
         <div class="card-name">${s.name}</div>
       </div>
       ${cats ? `<div class="card-cats">${cats}</div>` : ''}
-      ${s.address ? `<div class="card-addr">${s.address}</div>` : ''}
+      ${s.address ? `<div class="card-addr"><svg class="card-addr-pin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${s.address}</div>` : ''}
+      ${s.rating ? `<div class="card-addr" style="margin-bottom:10px">${SVG.star.replace('<svg', '<svg width="11" height="11" stroke="currentColor" fill="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"')} ${s.rating}</div>` : ''}
       ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
       <div class="card-foot">
-        ${s.mapsUrl ? `<a class="map-btn" href="${s.mapsUrl}" target="_blank" onclick="event.stopPropagation()">
-          ${SVG.pin.replace('<svg', '<svg width="11" height="11" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} Google Maps
-        </a>` : ''}
-        ${s.rating ? `<span class="rating">${SVG.star.replace('<svg', '<svg width="11" height="11" stroke="currentColor" fill="currentColor" stroke-width="1.5"')} ${s.rating}</span>` : ''}
+        <button class="card-action-btn ${s.favourited ? 'fav-on' : ''}" onclick="event.stopPropagation();toggleFav('${s.id}')">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="${s.favourited ? 'currentColor' : 'none'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          ${s.favourited ? '已收藏' : '收藏'}
+        </button>
+        <button class="card-action-btn ${s.visited ? 'visited-on' : ''}" onclick="event.stopPropagation();toggleVisited('${s.id}')">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          ${s.visited ? '已去過' : '去過'}
+        </button>
+        ${s.mapsUrl ? `<a class="map-btn" href="${s.mapsUrl}" target="_blank" onclick="event.stopPropagation()">地圖</a>` : ''}
         <button class="card-menu" onclick="event.stopPropagation();showCtx(event,'${s.id}')">⋯</button>
       </div>
     </div>`;
@@ -1465,7 +1538,9 @@ function openDetail(id) {
   detailCustomPhoto = null;
   const cats = (s.categories || []).map(cid => {
     const cat = allCats().find(c => c.id === cid);
-    return cat ? `<span class="card-cat-tag">${catIconSVG(cat, 11)} ${cat.name}</span>` : '';
+    if (!cat) return '';
+    const pc = CAT_PILL_COLORS[cat.id] || DEFAULT_PILL_COLOR;
+    return `<span class="card-cat-tag" style="background:${pc.bg};color:${pc.color}">${cat.name}</span>`;
   }).join('');
   const hasPic = !!(s.photoData || s.photoUrl);
   const picSrc = s.photoData || s.photoUrl || '';
