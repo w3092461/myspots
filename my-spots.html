@@ -1644,7 +1644,7 @@ function openDetail(id) {
     <div class="detail-title">${s.name}</div>
     ${cats ? `<div class="detail-cats">${cats}</div>` : ''}
     ${s.address ? `<div class="detail-row">${SVG.pin.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.address}</span></div>` : ''}
-    ${s.county ? `<div class="detail-row">${SVG.globe.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${s.county}</span></div>` : ''}
+    ${(s.county || s.city) ? `<div class="detail-row">${SVG.globe.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <span>${[s.county, s.city].filter(Boolean).join(' · ')}</span></div>` : ''}
     ${s.rating ? `<div class="detail-row">${SVG.star.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="currentColor" stroke-width="1.5"')} <span>${s.rating} 分</span></div>` : ''}
     ${s.sourceUrl ? `<div class="detail-row">${SVG.link.replace('<svg', '<svg width="15" height="15" stroke="var(--text3)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"')} <a href="${s.sourceUrl}" target="_blank">查看原始貼文</a></div>` : ''}
     ${s.note ? `<div class="detail-note">${s.note}</div>` : ''}
@@ -1808,31 +1808,27 @@ async function enrichSpot(id) {
     }
     if (place.location && !s.lat) { s.lat = place.location.latitude; s.lng = place.location.longitude; }
 
-    // Country / city detection (only fill if currently empty)
-    if (!s.county || !s.city) {
-      const components = place.addressComponents || [];
-      const getComp = type => components.find(c => c.types?.includes(type));
-      if (region === 'tw') {
-        if (!s.county) {
-          const countyMap = [['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],['金門縣'],['連江縣']];
-          for (const variants of countyMap) {
-            if (variants.some(v => addr.includes(v))) { s.county = variants[0]; break; }
-          }
-        }
-      } else {
-        const ISO = {'JP':'日本','KR':'韓國','HK':'香港','SG':'新加坡','TH':'泰國','VN':'越南','US':'美國','GB':'英國','FR':'法國','IT':'義大利','DE':'德國','ES':'西班牙','AU':'澳洲','CA':'加拿大','TW':'台灣','CN':'中國','MO':'澳門','NL':'荷蘭','BE':'比利時','CH':'瑞士','AT':'奧地利','PT':'葡萄牙','GR':'希臘','CZ':'捷克','HU':'匈牙利','PL':'波蘭','SE':'瑞典','NO':'挪威','DK':'丹麥','FI':'芬蘭','NZ':'紐西蘭','MY':'馬來西亞','ID':'印尼','PH':'菲律賓','IN':'印度','AE':'阿聯酋','TR':'土耳其','MX':'墨西哥','BR':'巴西','AR':'阿根廷'};
-        const CITY={'Tokyo':'東京','Osaka':'大阪','Kyoto':'京都','Fukuoka':'福岡','Sapporo':'札幌','Nagoya':'名古屋','Hiroshima':'廣島','Yokohama':'橫濱','Kobe':'神戶','Nara':'奈良','Sendai':'仙台','Hokkaido':'北海道','Aomori':'青森','Naha':'那霸','Okinawa':'沖繩','Miyakojima':'宮古島','Ishigaki':'石垣島','Ishigakijima':'石垣島','Beppu':'別府','Kagoshima':'鹿兒島','Nagasaki':'長崎','Kumamoto':'熊本','Seoul':'首爾','Busan':'釜山','Incheon':'仁川','Jeju':'濟州','Bangkok':'曼谷','Chiang Mai':'清邁','Phuket':'普吉','Hanoi':'河內','Ho Chi Minh City':'胡志明市','Da Nang':'峴港','Hoi An':'會安','Kuala Lumpur':'吉隆坡','Penang':'檳城','Bali':'峇里島','Jakarta':'雅加達','Manila':'馬尼拉','Paris':'巴黎','London':'倫敦','Rome':'羅馬','Milan':'米蘭','Barcelona':'巴塞隆納','Amsterdam':'阿姆斯特丹','Vienna':'維也納','Prague':'布拉格','Sydney':'雪梨','Melbourne':'墨爾本','Auckland':'奧克蘭','New York':'紐約','Los Angeles':'洛杉磯','San Francisco':'舊金山','Vancouver':'溫哥華','Toronto':'多倫多'};
-        const countryComp = getComp('country');
-        const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
-        if (countryComp && !s.county) {
-          const iso = countryComp.shortText || countryComp.shortName || '';
-          const long = countryComp.longText || countryComp.longName || '';
-          s.county = ISO[iso] || long || '其他';
-        }
-        if (cityComp && !s.city) {
-          const raw = cityComp.longText || cityComp.longName || '';
-          s.city = CITY[raw] || raw;
-        }
+    // Country / city detection — always overwrite from API (this is the point of enrichment)
+    const components = place.addressComponents || [];
+    const getComp = type => components.find(c => c.types?.includes(type));
+    if (region === 'tw') {
+      const countyMap = [['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],['金門縣'],['連江縣']];
+      for (const variants of countyMap) {
+        if (variants.some(v => addr.includes(v))) { s.county = variants[0]; break; }
+      }
+    } else {
+      const ISO = {'JP':'日本','KR':'韓國','HK':'香港','SG':'新加坡','TH':'泰國','VN':'越南','US':'美國','GB':'英國','FR':'法國','IT':'義大利','DE':'德國','ES':'西班牙','AU':'澳洲','CA':'加拿大','TW':'台灣','CN':'中國','MO':'澳門','NL':'荷蘭','BE':'比利時','CH':'瑞士','AT':'奧地利','PT':'葡萄牙','GR':'希臘','CZ':'捷克','HU':'匈牙利','PL':'波蘭','SE':'瑞典','NO':'挪威','DK':'丹麥','FI':'芬蘭','NZ':'紐西蘭','MY':'馬來西亞','ID':'印尼','PH':'菲律賓','IN':'印度','AE':'阿聯酋','TR':'土耳其','MX':'墨西哥','BR':'巴西','AR':'阿根廷'};
+      const CITY = {'Tokyo':'東京','Osaka':'大阪','Kyoto':'京都','Fukuoka':'福岡','Sapporo':'札幌','Nagoya':'名古屋','Hiroshima':'廣島','Yokohama':'橫濱','Kobe':'神戶','Nara':'奈良','Sendai':'仙台','Hokkaido':'北海道','Aomori':'青森','Naha':'那霸','Okinawa':'沖繩','Miyakojima':'宮古島','Miyako':'宮古島','Ishigaki':'石垣島','Ishigakijima':'石垣島','Beppu':'別府','Kagoshima':'鹿兒島','Nagasaki':'長崎','Kumamoto':'熊本','Miyazaki':'宮崎','Kagawa':'高松','Kochi':'高知','Okayama':'岡山','Hiroshima':'廣島','Yamaguchi':'山口','Saga':'佐賀','Oita':'大分','Nagano':'長野','Niigata':'新潟','Shizuoka':'靜岡','Kanazawa':'金澤','Hakodate':'函館','Otaru':'小樽','Furano':'富良野','Niseko':'二世谷','Seoul':'首爾','Busan':'釜山','Incheon':'仁川','Daegu':'大邱','Jeju':'濟州','Daejeon':'大田','Gwangju':'光州','Gyeongju':'慶州','Jeonju':'全州','Bangkok':'曼谷','Chiang Mai':'清邁','Phuket':'普吉','Pattaya':'芭達雅','Hanoi':'河內','Ho Chi Minh City':'胡志明市','Da Nang':'峴港','Hoi An':'會安','Nha Trang':'芽莊','Kuala Lumpur':'吉隆坡','Penang':'檳城','Langkawi':'蘭卡威','Kota Kinabalu':'亞庇','Bali':'峇里島','Jakarta':'雅加達','Yogyakarta':'日惹','Manila':'馬尼拉','Cebu':'宿霧','Paris':'巴黎','London':'倫敦','Rome':'羅馬','Milan':'米蘭','Barcelona':'巴塞隆納','Madrid':'馬德里','Amsterdam':'阿姆斯特丹','Vienna':'維也納','Prague':'布拉格','Budapest':'布達佩斯','Lisbon':'里斯本','Athens':'雅典','Berlin':'柏林','Munich':'慕尼黑','Sydney':'雪梨','Melbourne':'墨爾本','Brisbane':'布里斯本','Auckland':'奧克蘭','New York':'紐約','Los Angeles':'洛杉磯','San Francisco':'舊金山','Vancouver':'溫哥華','Toronto':'多倫多','Las Vegas':'拉斯維加斯'};
+      const countryComp = getComp('country');
+      const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
+      if (countryComp) {
+        const iso = countryComp.shortText || countryComp.shortName || '';
+        const long = countryComp.longText || countryComp.longName || '';
+        s.county = ISO[iso] || long || s.county || '其他';
+      }
+      if (cityComp) {
+        const raw = cityComp.longText || cityComp.longName || '';
+        s.city = CITY[raw] || raw || s.city;
       }
     }
 
