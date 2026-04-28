@@ -406,9 +406,27 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   .fab { bottom: 32px; right: calc((100vw - min(1200px, 100vw - 80px)) / 2 + 24px); }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  /* Fix "我的收藏" vertical stacking — add nowrap and shrink font */
+  .logo { font-size: 15px; white-space: nowrap; }
+  .logo small { display: none; }
+
+  /* Header tightening */
+  .hdr { padding: 12px 16px; gap: 8px; }
+
+  /* Hide count text to free up header space */
+  .cnt { display: none; }
+
+  /* Shrink action icon buttons */
+  .icon-btn { width: 30px; height: 30px; }
+
+  /* Single-column card grid */
   .grid { grid-template-columns: 1fr; padding: 12px; }
-  .hdr { padding: 13px 16px 11px; }
+
+  /* Taller card images on mobile */
+  .card-img-wrap { height: 220px; }
+  .card-img { height: 220px; }
+  .card-ph { height: 220px; }
 }
 </style>
 </head>
