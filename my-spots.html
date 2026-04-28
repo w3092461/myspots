@@ -28,21 +28,11 @@
   --sidebar-bg: var(--color-card);
   --card: var(--color-card); --border: var(--color-border); --border2: rgba(0,0,0,0.12);
   --text: var(--color-text); --text2: var(--color-text-secondary); --text3: #AAAAAA;
-  --accent: var(--color-text); --accent2: var(--color-text-secondary);
+  --accent: var(--color-text);
   --gold: var(--color-star); --visited: #C8E6C9;
   --shadow: var(--shadow-card);
   --radius: 16px;
   --accent-color: var(--color-primary);
-  --accent2-color: #2E9578;
-}
-[data-theme="dark"] {
-  --bg: #0d150f; --bg2: #131d14; --bg3: #192119;
-  --sidebar-bg: #0f190f;
-  --card: #131d14; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.14);
-  --text: #e8f0ea; --text2: #8aaa8e; --text3: #4a5e4d;
-  --accent: #e8f0ea; --accent2: #a8c0ac;
-  --gold: #d4a84a; --visited: #3a5a3e;
-  --shadow: 0 2px 14px rgba(0,0,0,0.4);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; }
@@ -385,7 +375,6 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 /* Sidebar emoji-badge category items */
 .sb-cat-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: none; background: transparent; width: 100%; text-align: left; font-family: 'Noto Sans TC', sans-serif; }
 .sb-cat-item:hover { background: rgba(0,0,0,0.05); }
-[data-theme="dark"] .sb-cat-item:hover { background: rgba(255,255,255,0.06); }
 .sb-cat-item.on { background: var(--accent-color); }
 .sb-cat-item.on .sb-cat-name { color: #fff; font-weight: 600; }
 .sb-cat-item.on .sb-cat-count { color: rgba(255,255,255,0.7); }
@@ -396,7 +385,6 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 /* Sidebar trip items */
 .sb-trip-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: none; background: transparent; width: 100%; text-align: left; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; color: var(--text); }
 .sb-trip-item:hover { background: rgba(0,0,0,0.05); }
-[data-theme="dark"] .sb-trip-item:hover { background: rgba(255,255,255,0.06); }
 .sb-trip-item.on { background: var(--accent-color); }
 .sb-trip-item.on .sb-cat-name { color: #fff; font-weight: 600; }
 
@@ -442,14 +430,6 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
         <button onclick="resetAccent()" style="padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Noto Sans TC',sans-serif">還原</button>
       </div>
     </div>
-    <div style="margin-top:14px">
-      <label style="font-size:10px;letter-spacing:0.1em;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase">第二強調色（已去過標記）</label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="color" id="accent2Pick" value="#2e9e6b" oninput="onAccent2Pick(this.value)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);cursor:pointer;padding:2px;background:none;flex-shrink:0">
-        <input class="input" id="accent2Hex" placeholder="#2e9e6b" maxlength="7" style="flex:1;padding:9px 12px" oninput="onAccent2Hex(this.value)">
-        <button onclick="resetAccent2()" style="padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Noto Sans TC',sans-serif">還原</button>
-      </div>
-    </div>
 
     <div class="setup-note">個人使用每月免費 10,000 次<br>點選外側區域可關閉設定</div>
   </div>
@@ -483,7 +463,6 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <div class="sb-section-label" id="sbTripLabel" style="display:none">行程</div>
   <div class="sb-trip-wrap" id="tripSection" style="display:none"></div>
   <div class="sb-actions">
-    <button class="icon-btn" onclick="toggleTheme()" title="切換主題" id="sbThemeBtn">☀</button>
     <button class="icon-btn" onclick="exportData()" title="匯出備份 JSON">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
@@ -513,7 +492,6 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   </div>
   <div class="hdr-actions">
     <span class="cnt" id="cnt"></span>
-    <button class="icon-btn" onclick="toggleTheme()" title="切換主題" id="themeBtn">☀</button>
     <button class="icon-btn" onclick="exportData()" title="匯出備份 JSON">
       <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
@@ -656,6 +634,11 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
       <textarea class="input" id="addNote" placeholder="推薦理由、必點餐點、注意事項..."></textarea>
     </div>
 
+    <div class="field" id="addTripField" style="display:none">
+      <label>加入行程（選填）</label>
+      <div class="trip-picks" id="addTripPicks"></div>
+    </div>
+
     <div class="actions">
       <button class="btn-sec" onclick="closeOverlay('addOverlay')">取消</button>
       <button class="btn-main" id="addBtn" onclick="confirmAdd()" disabled>加入收藏</button>
@@ -786,7 +769,6 @@ function spotKey() { return region === 'tw' ? 'myspots_v4' : 'myspots_abroad'; }
 function loadSpots() { return JSON.parse(localStorage.getItem(spotKey()) || '[]'); }
 let spots = loadSpots();
 let customCats = JSON.parse(localStorage.getItem('myspots_cats') || '[]');
-let theme = localStorage.getItem('myspots_theme') || 'light';
 let currentView = 'all';
 let currentFilters = [];
 let countyFilter = '';
@@ -798,6 +780,22 @@ let pendingSpot = null;
 let dragSrcId = null;
 let editingSpotId = null;
 let addSelectedCats = [];
+let addSelectedTrips = [];
+
+function renderAddTrips() {
+  const field = document.getElementById('addTripField');
+  const wrap  = document.getElementById('addTripPicks');
+  if (!trips.length) { field.style.display = 'none'; return; }
+  field.style.display = '';
+  wrap.innerHTML = trips.map(t =>
+    `<button class="trip-pick ${addSelectedTrips.includes(t.id) ? 'on' : ''}" onclick="toggleAddTrip('${t.id}')">${t.name}</button>`
+  ).join('');
+}
+function toggleAddTrip(id) {
+  if (addSelectedTrips.includes(id)) addSelectedTrips = addSelectedTrips.filter(x => x !== id);
+  else addSelectedTrips.push(id);
+  renderAddTrips();
+}
 
 let trips = JSON.parse(localStorage.getItem('myspots_trips') || '[]');
 let currentTripFilter = '';
@@ -992,44 +990,6 @@ function resetAccent() {
   document.getElementById('accentHex').value = DEFAULT_ACCENT;
 }
 
-const DEFAULT_ACCENT2 = '#5A9874';
-let accent2Color = localStorage.getItem('myspots_theme_color2') || DEFAULT_ACCENT2;
-
-function applyAccent2(color, save = true) {
-  document.documentElement.style.setProperty('--accent2-color', color);
-  accent2Color = color;
-  if (save) localStorage.setItem('myspots_theme_color2', color);
-}
-function onAccent2Pick(hex) {
-  document.getElementById('accent2Hex').value = hex;
-  applyAccent2(hex);
-}
-function onAccent2Hex(val) {
-  const hex = val.trim();
-  if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
-  document.getElementById('accent2Pick').value = hex;
-  applyAccent2(hex);
-}
-function resetAccent2() {
-  applyAccent2(DEFAULT_ACCENT2);
-  localStorage.removeItem('myspots_theme_color2');
-  document.getElementById('accent2Pick').value = DEFAULT_ACCENT2;
-  document.getElementById('accent2Hex').value = DEFAULT_ACCENT2;
-}
-
-// ── Theme ──────────────────────────────────────────────────────────────────
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', theme);
-  const icon = theme === 'dark' ? '☀' : '🌙';
-  document.getElementById('themeBtn').textContent = icon;
-  const sbBtn = document.getElementById('sbThemeBtn');
-  if (sbBtn) sbBtn.textContent = icon;
-  localStorage.setItem('myspots_theme', theme);
-}
-function toggleTheme() {
-  theme = theme === 'dark' ? 'light' : 'dark';
-  applyTheme();
-}
 
 // ── Setup ──────────────────────────────────────────────────────────────────
 function checkSetup() {
@@ -1045,8 +1005,6 @@ function openSettings() {
   document.getElementById('keyInput').value = getKey();
   document.getElementById('accentPick').value = accentColor;
   document.getElementById('accentHex').value = accentColor;
-  document.getElementById('accent2Pick').value = accent2Color;
-  document.getElementById('accent2Hex').value = accent2Color;
   document.getElementById('setupWrap').style.display = 'flex';
 }
 
@@ -1838,6 +1796,8 @@ function openAddModal() {
   document.getElementById('addCityField').style.display = isTW ? 'none' : '';
   document.getElementById('addCity').value = '';
   renderAddCats();
+  addSelectedTrips = [];
+  renderAddTrips();
   document.getElementById('acList').style.display = 'none';
   document.getElementById('addOverlay').classList.add('open');
   setTimeout(() => document.getElementById('addSearch').focus(), 300);
@@ -2039,11 +1999,54 @@ async function selectSearchResult(i) {
     const countryComp = getComp('country');
     const cityComp = getComp('locality') || getComp('administrative_area_level_2') || getComp('administrative_area_level_1');
 
+    // 城市英文 → 繁體中文對照表
+    const CITY_ZH_MAP = {
+      // 日本
+      'Tokyo':'東京','Osaka':'大阪','Kyoto':'京都','Fukuoka':'福岡',
+      'Sapporo':'札幌','Nagoya':'名古屋','Hiroshima':'廣島','Yokohama':'橫濱',
+      'Kobe':'神戶','Nara':'奈良','Sendai':'仙台','Hokkaido':'北海道',
+      'Aomori':'青森','Akita':'秋田','Kanazawa':'金澤','Hakodate':'函館',
+      'Asahikawa':'旭川','Kushiro':'釧路','Otaru':'小樽','Furano':'富良野',
+      'Naha':'那霸','Okinawa':'沖繩','Miyakojima':'宮古島','Miyako':'宮古島',
+      'Ishigaki':'石垣島','Ishigakijima':'石垣島',
+      'Beppu':'別府','Kagoshima':'鹿兒島','Nagasaki':'長崎','Kumamoto':'熊本',
+      'Miyazaki':'宮崎','Matsuyama':'松山','Takamatsu':'高松','Kochi':'高知',
+      'Tokushima':'德島','Okayama':'岡山','Matsue':'松江','Tottori':'鳥取',
+      'Yamaguchi':'山口','Saga':'佐賀','Oita':'大分','Nagano':'長野',
+      'Niigata':'新潟','Toyama':'富山','Fukui':'福井','Shizuoka':'靜岡',
+      'Mie':'三重','Wakayama':'和歌山','Shiga':'滋賀','Hyogo':'兵庫',
+      'Tochigi':'栃木','Gunma':'群馬','Saitama':'埼玉','Chiba':'千葉',
+      'Kanagawa':'神奈川','Ibaraki':'茨城','Fukushima':'福島','Yamagata':'山形',
+      'Iwate':'岩手','Miyagi':'宮城','Nikko':'日光','Hakone':'箱根',
+      'Kamakura':'鎌倉','Atami':'熱海','Hakuba':'白馬','Niseko':'二世谷',
+      // 韓國
+      'Seoul':'首爾','Busan':'釜山','Incheon':'仁川','Daegu':'大邱',
+      'Jeju':'濟州','Daejeon':'大田','Gwangju':'光州','Gyeongju':'慶州',
+      'Suwon':'水原','Jeonju':'全州',
+      // 東南亞
+      'Bangkok':'曼谷','Chiang Mai':'清邁','Phuket':'普吉','Pattaya':'芭達雅',
+      'Hanoi':'河內','Ho Chi Minh City':'胡志明市','Da Nang':'峴港','Hoi An':'會安','Nha Trang':'芽莊',
+      'Kuala Lumpur':'吉隆坡','Penang':'檳城','Langkawi':'蘭卡威','Kota Kinabalu':'亞庇',
+      'Bali':'峇里島','Jakarta':'雅加達','Yogyakarta':'日惹',
+      'Manila':'馬尼拉','Cebu':'宿霧','Boracay':'長灘島',
+      // 歐洲常見
+      'Paris':'巴黎','London':'倫敦','Rome':'羅馬','Milan':'米蘭',
+      'Barcelona':'巴塞隆納','Madrid':'馬德里','Amsterdam':'阿姆斯特丹',
+      'Vienna':'維也納','Prague':'布拉格','Budapest':'布達佩斯',
+      'Lisbon':'里斯本','Athens':'雅典','Berlin':'柏林','Munich':'慕尼黑',
+      // 大洋洲
+      'Sydney':'雪梨','Melbourne':'墨爾本','Brisbane':'布里斯本','Auckland':'奧克蘭',
+      // 北美
+      'New York':'紐約','Los Angeles':'洛杉磯','San Francisco':'舊金山',
+      'Vancouver':'溫哥華','Toronto':'多倫多','Las Vegas':'拉斯維加斯',
+    };
+
     if (countryComp) {
       const isoCode  = countryComp.shortText || countryComp.shortName || '';
       const longText = countryComp.longText  || countryComp.longName  || '';
       county = COUNTRY_ISO_MAP[isoCode] || COUNTRY_NAME_MAP[longText] || longText || '其他';
-      detectedCity = cityComp?.longText || cityComp?.longName || '';
+      const rawCity = cityComp?.longText || cityComp?.longName || '';
+      detectedCity = CITY_ZH_MAP[rawCity] || rawCity;
     } else {
       // fallback：關鍵字比對（addressComponents 缺席時才走這裡）
       const COUNTRY_MAP = [
@@ -2116,7 +2119,7 @@ async function confirmAdd() {
     ? (document.getElementById('addCounty').value || pendingSpot.county || '')
     : (document.getElementById('addCountry').value || pendingSpot.county || '');
   const city = region === 'abroad' ? document.getElementById('addCity').value.trim() : '';
-  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, city, trips: [], sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null, focalX: 0.5, focalY: 0.5 };
+  const spot = { ...pendingSpot, categories: [...addSelectedCats], county, city, trips: [...addSelectedTrips], sourceUrl: document.getElementById('addLink').value.trim(), note: document.getElementById('addNote').value.trim(), visited: false, photoData: null, focalX: 0.5, focalY: 0.5 };
   if (pendingCustomPhoto) {
     spot.photoData = pendingCustomPhoto;
     spot.photoUrl = null;
@@ -2188,15 +2191,26 @@ function handleImport(e) {
     try {
       const imported = JSON.parse(evt.target.result);
       if (!Array.isArray(imported)) throw new Error('格式錯誤');
-      const existingIds = new Set(spots.map(s => s.id));
-      const newOnes = imported.filter(s => s.id && !existingIds.has(s.id));
-      const dupes = imported.length - newOnes.length;
-      spots = [...newOnes, ...spots];
-      save(); renderMain();
-      const msg = newOnes.length > 0
-        ? `✅ 成功匯入 ${newOnes.length} 筆${dupes > 0 ? `，${dupes} 筆已存在略過` : ''}`
-        : `所有資料已存在，無需匯入`;
-      alert(msg);
+      const doReplace = confirm(
+        `📂 檔案包含 ${imported.length} 筆資料\n\n` +
+        '按「確定」→ 全部覆蓋（以此檔案為主，適合跨裝置同步）\n' +
+        '按「取消」→ 只加入新資料（保留現有資料）'
+      );
+      if (doReplace) {
+        spots = imported;
+        save(); renderMain();
+        alert(`✅ 已覆蓋，共 ${spots.length} 筆資料`);
+      } else {
+        const existingIds = new Set(spots.map(s => s.id));
+        const newOnes = imported.filter(s => s.id && !existingIds.has(s.id));
+        const dupes = imported.length - newOnes.length;
+        spots = [...newOnes, ...spots];
+        save(); renderMain();
+        const msg = newOnes.length > 0
+          ? `✅ 成功匯入 ${newOnes.length} 筆${dupes > 0 ? `，${dupes} 筆已存在略過` : ''}`
+          : `所有資料已存在，無需匯入`;
+        alert(msg);
+      }
     } catch(err) {
       alert('❌ 匯入失敗：' + err.message);
     }
@@ -2267,8 +2281,7 @@ function migrateSpots() {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 applyAccent(accentColor, false);
-applyAccent2(accent2Color, false);
-applyTheme();
+applyAccent(accentColor, false);
 migrateSpots();
 checkSetup();
 document.getElementById('regionTW')?.classList.toggle('on', region === 'tw');
