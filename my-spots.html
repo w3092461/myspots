@@ -9,16 +9,16 @@
 <style>
 /* ── Theme ── */
 :root {
-  --bg: #EFF4EC; --bg2: #E4EDE0; --bg3: #D6E3D1;
-  --sidebar-bg: #DDE9D8;
-  --card: #FFFFFF; --border: rgba(40,70,40,0.08); --border2: rgba(40,70,40,0.16);
-  --text: #1E2B20; --text2: #526054; --text3: #8EA090;
-  --accent: #1E2B20; --accent2: #526054;
-  --gold: #D4881A; --visited: #A8C0AC;
-  --shadow: 0 2px 14px rgba(30,50,30,0.09);
+  --bg: #F5F1EA; --bg2: #EDE7DA; --bg3: #E3DCCB;
+  --sidebar-bg: #E8E1D2;
+  --card: #FFFFFF; --border: rgba(100,70,40,0.09); --border2: rgba(100,70,40,0.18);
+  --text: #262018; --text2: #7A6E5C; --text3: #B0A490;
+  --accent: #262018; --accent2: #7A6E5C;
+  --gold: #D4881A; --visited: #C5B89A;
+  --shadow: 0 2px 14px rgba(80,50,20,0.09);
   --radius: 12px;
-  --accent-color: #4A8C65;
-  --accent2-color: #3A7A55;
+  --accent-color: #6BAA85;
+  --accent2-color: #5A9874;
 }
 [data-theme="dark"] {
   --bg: #0d150f; --bg2: #131d14; --bg3: #192119;
@@ -85,7 +85,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .county-count { font-size: 10px; color: var(--text3); font-weight: 300; }
 
 /* ── Card grid ── */
-.grid { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-content: start; }
+.grid { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; align-content: start; }
 
 /* ── Card ── */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s; cursor: pointer; position: relative; box-shadow: var(--shadow); }
@@ -104,15 +104,15 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .card-img { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--bg2); }
 .card-ph { width: 100%; height: 180px; background: var(--bg2); display: flex; align-items: center; justify-content: center; }
 .card-ph svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
-.card-body { padding: 14px; }
-.card-top { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
-.card-name { font-family: 'Noto Sans TC', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; }
+.card-body { padding: 16px; }
+.card-top { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+.card-name { font-family: 'Noto Sans TC', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; }
 .card-visited-badge { flex-shrink: 0; margin-top: 2px; }
 .card-visited-badge svg { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
-.card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
+.card-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
 .card-cat-tag { font-size: 11px; font-weight: 400; color: var(--text2); background: var(--bg2); border: none; border-radius: 6px; padding: 2px 8px; display: flex; align-items: center; gap: 3px; }
 .card-cat-tag svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.card-addr { font-size: 11px; color: var(--text3); font-weight: 400; line-height: 1.5; margin-bottom: 8px; }
+.card-addr { font-size: 11px; color: var(--text3); font-weight: 400; line-height: 1.5; margin-bottom: 10px; }
 .card-note { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .card-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text2); font-size: 10px; text-decoration: none; transition: all 0.15s; }
@@ -299,7 +299,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 .sidebar {
   display: none;
-  width: 232px;
+  width: 260px;
   flex-shrink: 0;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border2);
@@ -308,7 +308,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   height: 100vh;
   overflow-y: auto;
   flex-direction: column;
-  padding: 20px 14px 32px;
+  padding: 24px 16px 36px;
 }
 .sidebar::-webkit-scrollbar { width: 0; }
 
@@ -331,6 +331,24 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 .sb-trip-wrap .trip-tag:hover { background: var(--bg3); }
 .sb-trip-wrap .trip-tag.on { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
 .sb-trip-wrap .trip-add { width: 100%; text-align: left; border-radius: 8px; padding: 6px 10px; }
+
+/* Sidebar emoji-badge category items */
+.sb-cat-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: none; background: transparent; width: 100%; text-align: left; font-family: 'Noto Sans TC', sans-serif; }
+.sb-cat-item:hover { background: rgba(0,0,0,0.05); }
+[data-theme="dark"] .sb-cat-item:hover { background: rgba(255,255,255,0.06); }
+.sb-cat-item.on { background: var(--accent-color); }
+.sb-cat-item.on .sb-cat-name { color: #fff; font-weight: 600; }
+.sb-cat-item.on .sb-cat-count { color: rgba(255,255,255,0.7); }
+.sb-cat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.sb-cat-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 500; }
+.sb-cat-count { font-size: 11px; color: var(--text3); }
+
+/* Sidebar trip items */
+.sb-trip-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: none; background: transparent; width: 100%; text-align: left; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; color: var(--text); }
+.sb-trip-item:hover { background: rgba(0,0,0,0.05); }
+[data-theme="dark"] .sb-trip-item:hover { background: rgba(255,255,255,0.06); }
+.sb-trip-item.on { background: var(--accent-color); }
+.sb-trip-item.on .sb-cat-name { color: #fff; font-weight: 600; }
 
 .hdr-brand { display: flex; align-items: center; gap: 12px; }
 
@@ -395,6 +413,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <div class="sb-stats" id="sbStats"></div>
   <div class="sb-section-label">分類</div>
   <div class="sb-filter-wrap" id="filterSection"></div>
+  <div class="sb-section-label" id="sbAreaLabel" style="display:none">地區</div>
+  <div class="sb-filter-wrap" id="sbAreaSection" style="display:none"></div>
   <div class="sb-section-label" id="sbTripLabel" style="display:none">行程</div>
   <div class="sb-trip-wrap" id="tripSection" style="display:none"></div>
 </aside>
@@ -792,7 +812,19 @@ function updateFocalDot(dotId, x, y) {
 }
 
 // ── Accent Color ───────────────────────────────────────────────────────────
-const DEFAULT_ACCENT = '#45A87A';
+const CAT_COLORS = {
+  food:        { emoji: '🍜', bg: '#FFE8D6' },
+  coffee:      { emoji: '☕', bg: '#F0E6D3' },
+  stay:        { emoji: '🏠', bg: '#D6E8F0' },
+  scene:       { emoji: '🏔', bg: '#E2F0D6' },
+  pet:         { emoji: '🐾', bg: '#F0D6E8' },
+  notimelimit: { emoji: '💻', bg: '#E8E0F0' },
+  shopping:    { emoji: '🛍', bg: '#F0EDD6' },
+  dessert:     { emoji: '🍰', bg: '#F5D6E0' },
+};
+const DEFAULT_CAT_COLOR = { emoji: '📍', bg: '#E8E0D6' };
+
+const DEFAULT_ACCENT = '#6BAA85';
 let accentColor = localStorage.getItem('myspots_theme_color') || DEFAULT_ACCENT;
 
 function applyAccent(color, save = true) {
@@ -817,7 +849,7 @@ function resetAccent() {
   document.getElementById('accentHex').value = DEFAULT_ACCENT;
 }
 
-const DEFAULT_ACCENT2 = '#2e9e6b';
+const DEFAULT_ACCENT2 = '#5A9874';
 let accent2Color = localStorage.getItem('myspots_theme_color2') || DEFAULT_ACCENT2;
 
 function applyAccent2(color, save = true) {
@@ -890,14 +922,30 @@ function renderTripFilter() {
     currentTripFilter = '';
     return;
   }
-  const html = trips.map(t =>
+
+  // Mobile: pill tags
+  const mobileHtml = trips.map(t =>
     `<button class="trip-tag ${currentTripFilter === t.id ? 'on' : ''}" onclick="toggleTripFilter('${t.id}')">
       🗺 ${t.name}
     </button>`
   ).join('') +
   `<button class="trip-add" onclick="openTripModal()">＋ 管理行程</button>`;
-  if (sec) { sec.style.display = 'flex'; sec.innerHTML = html; }
-  if (secMobile) { secMobile.style.display = 'flex'; secMobile.innerHTML = html; }
+
+  // Sidebar: emoji-badge full-width items
+  const sidebarHtml = trips.map(t => {
+    const isOn = currentTripFilter === t.id;
+    return `<button class="sb-trip-item ${isOn ? 'on' : ''}" onclick="toggleTripFilter('${t.id}')">
+      <span class="sb-cat-icon" style="background:${isOn ? 'rgba(255,255,255,0.22)' : 'var(--bg3)'}">🗺</span>
+      <span class="sb-cat-name">${t.name}</span>
+    </button>`;
+  }).join('') +
+  `<button class="sb-trip-item" onclick="openTripModal()">
+    <span class="sb-cat-icon" style="background:var(--bg3)">＋</span>
+    <span class="sb-cat-name" style="color:var(--text3);font-size:12px">管理行程</span>
+  </button>`;
+
+  if (sec) { sec.style.display = 'flex'; sec.innerHTML = sidebarHtml; }
+  if (secMobile) { secMobile.style.display = 'flex'; secMobile.innerHTML = mobileHtml; }
   if (sbLabel) sbLabel.style.display = 'block';
 }
 
@@ -1026,7 +1074,10 @@ function renderViewTabs() {
 
 // ── Filter bar ─────────────────────────────────────────────────────────────
 function renderFilters() {
-  const html = allCats().map(c => {
+  const cats = allCats();
+
+  // Mobile: horizontal pill tags with SVG icons
+  const mobileHtml = cats.map(c => {
     const isCustom = customCats.find(x => x.id === c.id);
     return `<button class="ftag ${currentFilters.includes(c.id) ? 'on' : ''}" onclick="toggleFilter('${c.id}')">
       ${catIconSVG(c)} ${c.name}
@@ -1035,9 +1086,28 @@ function renderFilters() {
   }).join('') +
     `<button class="ftag-add" onclick="openCatModal()">＋ 新增分類</button>` +
     `<button class="ftag-add" onclick="openTripModal()">🗺 行程</button>`;
-  document.getElementById('filterSection').innerHTML = html;
+
+  // Sidebar: emoji-badge full-width items with spot counts
+  const sidebarHtml = cats.map(c => {
+    const isCustom = customCats.find(x => x.id === c.id);
+    const cc = CAT_COLORS[c.id] || DEFAULT_CAT_COLOR;
+    const count = spots.filter(s => s.categories?.includes(c.id)).length;
+    const isOn = currentFilters.includes(c.id);
+    return `<button class="sb-cat-item ${isOn ? 'on' : ''}" onclick="toggleFilter('${c.id}')">
+      <span class="sb-cat-icon" style="background:${isOn ? 'rgba(255,255,255,0.22)' : cc.bg}">${cc.emoji}</span>
+      <span class="sb-cat-name">${c.name}</span>
+      ${count ? `<span class="sb-cat-count">${count}</span>` : ''}
+      ${isCustom ? `<span class="ftag-del" onclick="event.stopPropagation();deleteCustomCat('${c.id}')" title="刪除分類">×</span>` : ''}
+    </button>`;
+  }).join('') +
+    `<button class="sb-cat-item" onclick="openCatModal()">
+      <span class="sb-cat-icon" style="background:var(--bg3)">＋</span>
+      <span class="sb-cat-name" style="color:var(--text3);font-size:12px">新增分類</span>
+    </button>`;
+
+  document.getElementById('filterSection').innerHTML = sidebarHtml;
   const mobile = document.getElementById('filterSectionMobile');
-  if (mobile) mobile.innerHTML = html;
+  if (mobile) mobile.innerHTML = mobileHtml;
 }
 
 function toggleFilter(id) {
@@ -1255,10 +1325,34 @@ function makeCard(s) {
 function renderCountyFilters() {
   const sec = document.getElementById('countyFilterSection');
   const counties = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
-  if (!counties.length) { sec.style.display = 'none'; return; }
+  if (!counties.length) { sec.style.display = 'none'; renderSidebarArea([]); return; }
   sec.style.display = currentView === 'county' ? 'flex' : 'none';
   sec.innerHTML = `<button class="county-ftag ${!countyFilter ? 'on' : ''}" onclick="setCountyFilter('')">全部</button>` +
     counties.map(c => `<button class="county-ftag ${countyFilter === c ? 'on' : ''}" onclick="setCountyFilter('${c}')">${c}</button>`).join('');
+  renderSidebarArea(counties, false);
+}
+
+function renderSidebarArea(items, isCountry) {
+  const label = document.getElementById('sbAreaLabel');
+  const wrap = document.getElementById('sbAreaSection');
+  if (!label || !wrap) return;
+  if (!items.length) { label.style.display = 'none'; wrap.style.display = 'none'; return; }
+  label.style.display = 'block'; wrap.style.display = 'flex';
+  const activeFilter = isCountry ? countryFilter : countyFilter;
+  const clickFn = isCountry ? 'setCountryFilter' : 'setCountyFilter';
+  wrap.innerHTML = `<button class="sb-cat-item ${!activeFilter ? 'on' : ''}" onclick="${clickFn}('')">
+    <span class="sb-cat-icon" style="background:${!activeFilter ? 'rgba(255,255,255,0.22)' : 'var(--bg3)'}">🗂</span>
+    <span class="sb-cat-name">全部</span>
+    <span class="sb-cat-count">${spots.length}</span>
+  </button>` + items.map(c => {
+    const isOn = activeFilter === c;
+    const cnt = spots.filter(s => s.county === c).length;
+    return `<button class="sb-cat-item ${isOn ? 'on' : ''}" onclick="${clickFn}('${c.replace(/'/g,"\\'")}')">
+      <span class="sb-cat-icon" style="background:${isOn ? 'rgba(255,255,255,0.22)' : 'var(--bg3)'}">📍</span>
+      <span class="sb-cat-name">${c}</span>
+      ${cnt ? `<span class="sb-cat-count">${cnt}</span>` : ''}
+    </button>`;
+  }).join('');
 }
 
 function setCountyFilter(c) {
@@ -1270,10 +1364,11 @@ function setCountyFilter(c) {
 function renderAbroadFilters() {
   const sec = document.getElementById('countyFilterSection');
   const countries = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
-  if (!countries.length || currentView !== 'country') { sec.style.display = 'none'; document.getElementById('cityFilterSection').style.display = 'none'; return; }
+  if (!countries.length || currentView !== 'country') { sec.style.display = 'none'; document.getElementById('cityFilterSection').style.display = 'none'; renderSidebarArea([]); return; }
   sec.style.display = 'flex';
   sec.innerHTML = `<button class="county-ftag ${!countryFilter?'on':''}" onclick="setCountryFilter('')">全部</button>` +
     countries.map(c => `<button class="county-ftag ${countryFilter===c?'on':''}" onclick="setCountryFilter('${c}')">${c}</button>`).join('');
+  renderSidebarArea(countries, true);
 
   const citySec = document.getElementById('cityFilterSection');
   if (countryFilter) {
