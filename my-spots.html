@@ -40,7 +40,7 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 
 /* ── Region toggle ── */
 .region-toggle { display: flex; gap: 2px; background: var(--bg2); border-radius: 6px; padding: 2px; flex-shrink: 0; }
-.region-btn { flex: 1; padding: 5px 11px; border-radius: 4px; border: none; background: transparent; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; white-space: nowrap; text-align: center; }
+.region-btn { flex: 1; padding: 5px 11px; border-radius: 4px; border: none; background: transparent; font-size: 13px; font-weight: 500; color: var(--color-text); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; white-space: nowrap; text-align: center; }
 .region-btn.on { background: var(--accent-color); color: #fff; }
 
 /* ── Header ── */
@@ -471,8 +471,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     </div>
   </div>
   <div class="region-toggle sb-region-toggle">
-    <button class="region-btn" id="sbRegionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
-    <button class="region-btn" id="sbRegionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+    <button class="region-btn" id="sbRegionTW" onclick="setRegion('tw')">台灣</button>
+    <button class="region-btn" id="sbRegionAbroad" onclick="setRegion('abroad')">國外</button>
   </div>
   <div class="sb-stats" id="sbStats"></div>
   <div class="sb-section-label">分類</div>
@@ -507,8 +507,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   <div class="hdr-brand">
     <div class="logo">我的收藏 <small>MY SPOTS</small></div>
     <div class="region-toggle">
-      <button class="region-btn on" id="regionTW" onclick="setRegion('tw')">🇹🇼 台灣</button>
-      <button class="region-btn" id="regionAbroad" onclick="setRegion('abroad')">🌏 國外</button>
+      <button class="region-btn on" id="regionTW" onclick="setRegion('tw')">台灣</button>
+      <button class="region-btn" id="regionAbroad" onclick="setRegion('abroad')">國外</button>
     </div>
   </div>
   <div class="hdr-actions">
@@ -1252,8 +1252,8 @@ function getFilteredSpots() {
   if (currentView === 'fav') list = list.filter(s => s.favourited);
   if (currentFilters.length) list = list.filter(s => s.categories?.some(c => currentFilters.includes(c)));
   if (region === 'tw' && countyFilter) list = list.filter(s => s.county === countyFilter);
-  if (region === 'abroad' && countryFilter) list = list.filter(s => s.county === countryFilter);
-  if (region === 'abroad' && abroadCityFilter) list = list.filter(s => s.city === abroadCityFilter);
+  if (region === 'abroad' && countryFilter && currentView !== 'all') list = list.filter(s => s.county === countryFilter);
+  if (region === 'abroad' && abroadCityFilter && currentView !== 'all') list = list.filter(s => s.city === abroadCityFilter);
   if (currentTripFilter) list = list.filter(s => s.trips?.includes(currentTripFilter));
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -1581,20 +1581,31 @@ function renderAbroadFilters() {
     return;
   }
 
-  // Top horizontal country filter bar (both country & city views)
-  sec.style.display = 'flex';
-  sec.innerHTML = `<button class="county-ftag ${!countryFilter?'on':''}" onclick="setCountryFilter('')">全部</button>` +
-    countries.map(c => `<button class="county-ftag ${countryFilter===c?'on':''}" onclick="setCountryFilter('${c}')">${c}</button>`).join('');
-
-  // City sub-filter bar: only in 'country' view when a country is selected
-  if (currentView === 'country' && countryFilter) {
-    const cities = [...new Set(spots.filter(s => s.county === countryFilter && s.city).map(s => s.city))].sort();
-    if (cities.length) {
-      citySec.style.display = 'flex';
-      citySec.innerHTML = `<button class="county-ftag ${!abroadCityFilter?'on':''}" onclick="setAbroadCityFilter('')">全部城市</button>` +
-        cities.map(c => `<button class="county-ftag ${abroadCityFilter===c?'on':''}" onclick="setAbroadCityFilter('${c}')">${c}</button>`).join('');
+  if (currentView === 'city') {
+    // City view: top bar shows cities (scoped to selected country if any)
+    const cityPool = spots.filter(s => (!countryFilter || s.county === countryFilter) && s.city);
+    const allCities = [...new Set(cityPool.map(s => s.city))].sort();
+    if (allCities.length) {
+      sec.style.display = 'flex';
+      sec.innerHTML = `<button class="county-ftag ${!abroadCityFilter?'on':''}" onclick="setAbroadCityFilter('')">全部</button>` +
+        allCities.map(c => `<button class="county-ftag ${abroadCityFilter===c?'on':''}" onclick="setAbroadCityFilter('${c}')">${c}</button>`).join('');
+    } else { sec.style.display = 'none'; }
+    citySec.style.display = 'none';
+  } else {
+    // Country view: top bar shows countries
+    sec.style.display = 'flex';
+    sec.innerHTML = `<button class="county-ftag ${!countryFilter?'on':''}" onclick="setCountryFilter('')">全部</button>` +
+      countries.map(c => `<button class="county-ftag ${countryFilter===c?'on':''}" onclick="setCountryFilter('${c}')">${c}</button>`).join('');
+    // City sub-filter bar when a country is selected
+    if (countryFilter) {
+      const cities = [...new Set(spots.filter(s => s.county === countryFilter && s.city).map(s => s.city))].sort();
+      if (cities.length) {
+        citySec.style.display = 'flex';
+        citySec.innerHTML = `<button class="county-ftag ${!abroadCityFilter?'on':''}" onclick="setAbroadCityFilter('')">全部城市</button>` +
+          cities.map(c => `<button class="county-ftag ${abroadCityFilter===c?'on':''}" onclick="setAbroadCityFilter('${c}')">${c}</button>`).join('');
+      } else { citySec.style.display = 'none'; }
     } else { citySec.style.display = 'none'; }
-  } else { citySec.style.display = 'none'; }
+  }
 
   // Sidebar countries
   renderSidebarArea(countries, true);
