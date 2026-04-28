@@ -783,13 +783,11 @@ let addSelectedCats = [];
 let addSelectedTrips = [];
 
 function renderAddTrips() {
-  const field = document.getElementById('addTripField');
-  const wrap  = document.getElementById('addTripPicks');
-  if (!trips.length) { field.style.display = 'none'; return; }
-  field.style.display = '';
+  const wrap = document.getElementById('addTripPicks');
+  document.getElementById('addTripField').style.display = '';
   wrap.innerHTML = trips.map(t =>
     `<button class="trip-pick ${addSelectedTrips.includes(t.id) ? 'on' : ''}" onclick="toggleAddTrip('${t.id}')">${t.name}</button>`
-  ).join('');
+  ).join('') + `<button class="ftag-add" onclick="openTripModal()">＋ 新增行程</button>`;
 }
 function toggleAddTrip(id) {
   if (addSelectedTrips.includes(id)) addSelectedTrips = addSelectedTrips.filter(x => x !== id);
@@ -1084,6 +1082,7 @@ function saveTripModal() {
   document.getElementById('tripModalInput').value = '';
   renderTripList();
   renderTripFilter();
+  if (document.getElementById('addOverlay').classList.contains('open')) renderAddTrips();
 }
 
 function deleteTrip(id) {
