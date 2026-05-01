@@ -877,12 +877,26 @@ async function migratePhotosToIDB() {
     let changed = false;
     for (const s of arr) {
       if (s.photoData && s.photoData !== 'idb') {
-        await idbSavePhoto(s.id, s.photoData);
-        s.photoData = 'idb';
-        changed = true;
+        const ok = await idbSavePhoto(s.id, s.photoData);
+        if (ok) { s.photoData = 'idb'; changed = true; }
       }
     }
     if (changed) localStorage.setItem(key, JSON.stringify(arr));
+  }
+  spots = JSON.parse(localStorage.getItem(spotKey()) || '[]');
+}
+async function recoverMissingIDBPhotos() {
+  if (!_photoDB) return;
+  for (const key of ['myspots_v4', 'myspots_abroad']) {
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    let changed = false;
+    for (const s of arr) {
+      if (s.photoData === 'idb') {
+        const data = await idbGetPhoto(s.id);
+        if (!data) { s.photoData = null; changed = true; }
+      }
+    }
+    if (changed) { try { localStorage.setItem(key, JSON.stringify(arr)); } catch(e) {} }
   }
   spots = JSON.parse(localStorage.getItem(spotKey()) || '[]');
 }
@@ -1599,9 +1613,11 @@ function makeCard(s) {
   card.onclick = () => openDetail(s.id);
   if (s.photoData === 'idb') {
     idbGetPhoto(s.id).then(data => {
-      if (!data) return;
       const img = card.querySelector('.card-img');
-      if (img) img.src = data;
+      if (!img) return;
+      if (data) { img.src = data; return; }
+      if (s.photoUrl) img.src = s.photoUrl;
+      else img.style.display = 'none';
     });
   }
   card.addEventListener('dragstart', e => { dragSrcId = s.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
@@ -2624,6 +2640,7 @@ renderViewTabs();
 renderFilters();
 openPhotoDB().then(async () => {
   await migratePhotosToIDB();
+  await recoverMissingIDBPhotos();
   renderMain();
 });
 
