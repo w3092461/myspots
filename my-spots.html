@@ -1574,9 +1574,12 @@ function makeCard(s) {
     ? `<div class="card-trips">${spotTrips.map(t => `<span class="card-trip-tag">${t.name}</span>`).join('')}</div>`
     : '';
 
-  const _photoSrc = (s.photoData && s.photoData !== 'idb') ? s.photoData : (s.photoUrl || '');
+  const _isIDB = s.photoData === 'idb';
+  const _photoSrc = _isIDB
+    ? 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+    : (s.photoData || s.photoUrl || '');
   const photoHtml = (s.photoData || s.photoUrl)
-    ? `<img class="card-img" src="${_photoSrc}" loading="lazy" onerror="this.style.display='none'" style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">`
+    ? `<img class="card-img" src="${_photoSrc}" loading="lazy" ${_isIDB ? '' : "onerror=\"this.style.display='none'\""} style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">`
     : `<div class="card-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A8B8C4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>`;
 
   card.innerHTML = `
@@ -1615,8 +1618,8 @@ function makeCard(s) {
     idbGetPhoto(s.id).then(data => {
       const img = card.querySelector('.card-img');
       if (!img) return;
-      if (data) { img.src = data; return; }
-      if (s.photoUrl) img.src = s.photoUrl;
+      if (data) { img.style.display = ''; img.src = data; return; }
+      if (s.photoUrl) { img.onerror = () => { img.style.display = 'none'; }; img.src = s.photoUrl; }
       else img.style.display = 'none';
     });
   }
