@@ -121,6 +121,7 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .card-rating-score { font-size: 13px; font-weight: 700; color: var(--color-text); }
 .card-rating-count { font-size: 12px; color: var(--color-text-secondary); }
 .card-addr { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 20px; }
+.card-loc { font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; opacity: 0.8; }
 
 /* Card footer — 3 icons, equal spacing */
 .card-footer { border-top: 1px solid var(--color-border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; }
@@ -274,10 +275,11 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 /* ── Photo upload & focal drag ── */
 .focal-wrap { position: relative; border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; user-select: none; -webkit-user-select: none; }
-.focal-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; }
-.focal-overlay { position: absolute; inset: 0; cursor: crosshair; }
-.focal-dot { position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid #fff; background: rgba(255,255,255,0.2); box-shadow: 0 0 0 1.5px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.3); transform: translate(-50%,-50%); pointer-events: none; transition: left 0.05s, top 0.05s; }
+.focal-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; cursor: grab; }
+.focal-wrap img.focal-grabbing { cursor: grabbing; }
 .focal-hint { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 8px; text-align: center; font-size: 10px; color: rgba(255,255,255,0.9); background: linear-gradient(transparent, rgba(0,0,0,0.5)); pointer-events: none; letter-spacing: 0.03em; }
+.sheet-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: var(--bg3); border: none; color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.sheet-close:hover { background: var(--border2); color: var(--text); }
 .upload-trigger { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; border: 1.5px dashed var(--border2); border-radius: var(--radius); font-size: 12px; color: var(--text3); cursor: pointer; transition: all 0.15s; background: var(--bg2); font-family: 'Noto Sans TC', sans-serif; }
 .upload-trigger:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
@@ -569,6 +571,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
 <div class="overlay" id="addOverlay" onclick="handleOverlay(event,'addOverlay')">
   <div class="sheet">
     <div class="handle"></div>
+    <button class="sheet-close" onclick="closeOverlay('addOverlay')">✕</button>
     <div class="sheet-title">新增收藏地點</div>
     <div class="sheet-sub">輸入店名搜尋，或直接手動填寫。</div>
 
@@ -601,10 +604,8 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
     <!-- Photo upload (shown after place selected) -->
     <div id="addPhotoSection" style="display:none;margin-bottom:4px">
       <div class="focal-wrap" id="addFocalWrap" style="display:none">
-        <img id="addFocalImg" src="" alt="">
-        <div class="focal-overlay" id="addFocalOverlay"></div>
-        <div class="focal-dot" id="addFocalDot" style="left:50%;top:50%"></div>
-        <div class="focal-hint">點擊或拖曳設定圖片焦點</div>
+        <img id="addFocalImg" src="" alt="" style="object-position:50% 50%">
+        <div class="focal-hint">拖曳調整圖片位置</div>
       </div>
       <label class="upload-trigger" for="photoFileInput">
         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -633,11 +634,16 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
       </select>
       <select class="input" id="addCountry" style="display:none;margin-top:6px">
         <option value="">選擇國家</option>
-        <option>日本</option><option>韓國</option><option>香港</option>
-        <option>新加坡</option><option>泰國</option><option>越南</option>
-        <option>美國</option><option>英國</option><option>法國</option>
-        <option>義大利</option><option>德國</option><option>西班牙</option>
-        <option>澳洲</option><option>加拿大</option><option>其他</option>
+        <option>日本</option><option>韓國</option><option>香港</option><option>澳門</option>
+        <option>中國</option><option>台灣</option>
+        <option>新加坡</option><option>泰國</option><option>越南</option><option>馬來西亞</option>
+        <option>印尼</option><option>菲律賓</option>
+        <option>美國</option><option>加拿大</option><option>澳洲</option><option>紐西蘭</option>
+        <option>英國</option><option>法國</option><option>義大利</option><option>西班牙</option>
+        <option>德國</option><option>荷蘭</option><option>瑞士</option><option>奧地利</option>
+        <option>葡萄牙</option><option>希臘</option><option>捷克</option><option>匈牙利</option>
+        <option>芬蘭</option><option>瑞典</option><option>挪威</option><option>丹麥</option>
+        <option>其他</option>
       </select>
     </div>
     <div class="field" id="addCityField" style="display:none">
@@ -768,9 +774,9 @@ const SVG = {
 };
 
 const DEFAULT_CATS_TW = [
-  { id: 'food',        name: '餐廳',     icon: 'utensils' },
+  { id: 'food',        name: '美食',     icon: 'utensils' },
   { id: 'coffee',      name: '咖啡廳',   icon: 'coffee' },
-  { id: 'stay',        name: '民宿',     icon: 'house' },
+  { id: 'stay',        name: '住宿',     icon: 'house' },
   { id: 'scene',       name: '景點',     icon: 'binoculars' },
   { id: 'pet',         name: '寵物友善', icon: 'dog' },
   { id: 'notimelimit', name: '不限時',   icon: 'alarm-clock' },
@@ -861,51 +867,72 @@ async function handlePhotoUpload(e, ctx) {
     pendingFocalX = 0.5; pendingFocalY = 0.5;
     const img = document.getElementById('addFocalImg');
     img.src = data;
-    updateFocalDot('addFocalDot', 0.5, 0.5);
+    const addImg = document.getElementById('addFocalImg');
+    if (addImg) addImg.style.objectPosition = '50% 50%';
     document.getElementById('addFocalWrap').style.display = 'block';
-    setupFocalDrag('addFocalOverlay', 'addFocalDot', (x, y) => { pendingFocalX = x; pendingFocalY = y; });
+    setupFocalDrag('addFocalImg', (x, y) => { pendingFocalX = x; pendingFocalY = y; });
   } else if (ctx === 'detail') {
     detailCustomPhoto = data;
     detailFocalX = 0.5; detailFocalY = 0.5;
     const img = document.getElementById('detailFocalImg');
-    if (img) { img.src = data; }
-    updateFocalDot('detailFocalDot', 0.5, 0.5);
+    if (img) { img.src = data; img.style.objectPosition = '50% 50%'; }
     document.getElementById('detailFocalWrap').style.display = 'block';
-    setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
+    setupFocalDrag('detailFocalImg', (x, y) => { detailFocalX = x; detailFocalY = y; });
   }
   e.target.value = '';
 }
 
-function setupFocalDrag(overlayId, dotId, callback) {
-  const overlay = document.getElementById(overlayId);
-  if (!overlay) return;
-  const getPos = e => {
-    const rect = overlay.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: Math.max(0, Math.min(1, (cx - rect.left) / rect.width)),
-      y: Math.max(0, Math.min(1, (cy - rect.top) / rect.height))
-    };
-  };
-  const apply = e => {
-    if (!_focalDragging) return;
-    e.preventDefault();
-    const {x, y} = getPos(e);
-    updateFocalDot(dotId, x, y);
-    callback(x, y);
-  };
-  overlay.addEventListener('mousedown', e => { _focalDragging = true; apply(e); });
-  overlay.addEventListener('mousemove', apply);
-  document.addEventListener('mouseup', () => { _focalDragging = false; });
-  overlay.addEventListener('touchstart', e => { _focalDragging = true; apply(e); }, {passive: false});
-  overlay.addEventListener('touchmove', apply, {passive: false});
-  document.addEventListener('touchend', () => { _focalDragging = false; });
-}
+function setupFocalDrag(imgId, callback) {
+  const img = document.getElementById(imgId);
+  if (!img) return;
+  let dragging = false, startX = 0, startY = 0, startFX = 0.5, startFY = 0.5;
 
-function updateFocalDot(dotId, x, y) {
-  const dot = document.getElementById(dotId);
-  if (dot) { dot.style.left = (x * 100) + '%'; dot.style.top = (y * 100) + '%'; }
+  const getSens = () => {
+    const cw = img.offsetWidth || 300, ch = img.offsetHeight || 160;
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if (!nw || !nh) return { sx: cw, sy: ch };
+    const ca = cw / ch, ia = nw / nh;
+    if (ca > ia) {
+      const dh = cw / ia;
+      return { sx: cw * 4, sy: Math.max(dh - ch, 8) };
+    } else {
+      const dw = ch * ia;
+      return { sx: Math.max(dw - cw, 8), sy: ch * 4 };
+    }
+  };
+
+  const getClient = e => e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+
+  const onStart = e => {
+    dragging = true;
+    img.classList.add('focal-grabbing');
+    const c = getClient(e);
+    startX = c.x; startY = c.y;
+    const parts = (img.style.objectPosition || '50% 50%').split(' ');
+    startFX = parseFloat(parts[0]) / 100 || 0.5;
+    startFY = parseFloat(parts[1]) / 100 || 0.5;
+    e.preventDefault();
+  };
+
+  const onMove = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const c = getClient(e);
+    const { sx, sy } = getSens();
+    const fx = Math.max(0, Math.min(1, startFX - (c.x - startX) / sx));
+    const fy = Math.max(0, Math.min(1, startFY - (c.y - startY) / sy));
+    img.style.objectPosition = `${(fx * 100).toFixed(1)}% ${(fy * 100).toFixed(1)}%`;
+    callback(fx, fy);
+  };
+
+  const onEnd = () => { dragging = false; img.classList.remove('focal-grabbing'); };
+
+  img.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  img.addEventListener('touchstart', onStart, { passive: false });
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onEnd);
 }
 
 // ── Accent Color ───────────────────────────────────────────────────────────
@@ -1251,7 +1278,7 @@ function getFilteredSpots() {
   if (currentView === 'visited') list = list.filter(s => s.visited);
   if (currentView === 'fav') list = list.filter(s => s.favourited);
   if (currentFilters.length) list = list.filter(s => s.categories?.some(c => currentFilters.includes(c)));
-  if (region === 'tw' && countyFilter) list = list.filter(s => s.county === countyFilter);
+  if (region === 'tw' && countyFilter) list = list.filter(s => (s.county?.slice(0,2) || s.county) === countyFilter);
   if (region === 'abroad' && countryFilter && currentView !== 'all') list = list.filter(s => s.county === countryFilter);
   if (region === 'abroad' && abroadCityFilter && currentView !== 'all') list = list.filter(s => s.city === abroadCityFilter);
   if (currentTripFilter) list = list.filter(s => s.trips?.includes(currentTripFilter));
@@ -1309,7 +1336,7 @@ function renderCountyView(content) {
   const list = getFilteredSpots();
   const groups = {};
   list.forEach(s => {
-    const key = s.county || '未分縣市';
+    const key = (s.county?.slice(0,2) || s.county) || '未分縣市';
     if (!groups[key]) groups[key] = [];
     groups[key].push(s);
   });
@@ -1490,6 +1517,7 @@ function makeCard(s) {
       <div class="card-name">${s.name}</div>
       ${ratingHtml}
       ${s.address ? `<div class="card-addr">${s.address}</div>` : ''}
+      ${region === 'abroad' && (s.county || s.city) ? `<div class="card-loc">${[s.county, s.city].filter(Boolean).join(' · ')}</div>` : ''}
       ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
       ${tripTagsHtml}
     </div>
@@ -1530,7 +1558,7 @@ function makeCard(s) {
 // ── County filter bar ──────────────────────────────────────────────────────
 function renderCountyFilters() {
   const sec = document.getElementById('countyFilterSection');
-  const counties = [...new Set(spots.map(s => s.county).filter(Boolean))].sort();
+  const counties = [...new Set(spots.map(s => s.county?.slice(0,2) || s.county).filter(Boolean))].sort();
   if (!counties.length) { sec.style.display = 'none'; renderSidebarArea([]); return; }
   sec.style.display = currentView === 'county' ? 'flex' : 'none';
   sec.innerHTML = `<button class="county-ftag ${!countyFilter ? 'on' : ''}" onclick="setCountyFilter('')">全部</button>` +
@@ -1553,7 +1581,7 @@ function renderSidebarArea(items, isCountry) {
     </button>` +
     items.map(c => {
       const isOn = activeFilter === c;
-      const cnt = spots.filter(s => s.county === c).length;
+      const cnt = spots.filter(s => (s.county?.slice(0,2) || s.county) === c).length;
       return `<button class="area-item${isOn ? ' active' : ''}" onclick="${clickFn}('${c.replace(/'/g,"\\'")}')">
         <span>${c}</span>
         ${cnt ? `<span class="area-count">${cnt}</span>` : ''}
@@ -1736,9 +1764,7 @@ function openDetail(id) {
     ${hasPic ? `
       <div class="focal-wrap" id="detailFocalWrap">
         <img class="detail-img" src="${picSrc}" onerror="this.style.display='none'" id="detailFocalImg" style="height:200px;border-radius:0;margin-bottom:0;object-position:${fx}% ${fy}%">
-        <div class="focal-overlay" id="detailFocalOverlay"></div>
-        <div class="focal-dot" id="detailFocalDot" style="left:${fx}%;top:${fy}%"></div>
-        <div class="focal-hint">點擊或拖曳設定焦點 · 儲存後生效</div>
+        <div class="focal-hint">拖曳調整位置 · 儲存後生效</div>
       </div>` :
       `<div class="detail-ph">${SVG.pin.replace('<svg', '<svg width="48" height="48" stroke="var(--text3)" fill="none" stroke-width="1"')}</div>`}
     <div class="detail-title">${s.name}</div>
@@ -1788,10 +1814,8 @@ function openDetail(id) {
         <label>更換圖片</label>
         <div id="detailUploadPreview" style="display:none;margin-bottom:8px">
           <div class="focal-wrap" id="detailNewFocalWrap">
-            <img id="detailNewFocalImg" src="" alt="" style="width:100%;height:140px;object-fit:cover;display:block">
-            <div class="focal-overlay" id="detailNewFocalOverlay"></div>
-            <div class="focal-dot" id="detailNewFocalDot" style="left:50%;top:50%"></div>
-            <div class="focal-hint">點擊或拖曳設定焦點</div>
+            <img id="detailNewFocalImg" src="" alt="" style="width:100%;height:140px;object-fit:cover;display:block;object-position:50% 50%">
+            <div class="focal-hint">拖曳調整圖片位置</div>
           </div>
         </div>
         <label class="upload-trigger" for="detailPhotoInput">
@@ -1812,7 +1836,7 @@ function openDetail(id) {
   renderDetailCats(s.categories || []);
   renderDetailTrips(s.trips || []);
   if (hasPic) {
-    setupFocalDrag('detailFocalOverlay', 'detailFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
+    setupFocalDrag('detailFocalImg', (x, y) => { detailFocalX = x; detailFocalY = y; });
   }
   refreshIcons();
 }
@@ -1923,7 +1947,7 @@ async function enrichSpot(id) {
     if (region === 'tw') {
       const countyMap = [['台北市','臺北市'],['新北市'],['桃園市'],['台中市','臺中市'],['台南市','臺南市'],['高雄市'],['基隆市'],['新竹市'],['新竹縣'],['苗栗縣'],['彰化縣'],['南投縣'],['雲林縣'],['嘉義市'],['嘉義縣'],['屏東縣'],['宜蘭縣'],['花蓮縣'],['台東縣','臺東縣'],['澎湖縣'],['金門縣'],['連江縣']];
       for (const variants of countyMap) {
-        if (variants.some(v => addr.includes(v))) { s.county = variants[0]; break; }
+        if (variants.some(v => addr.includes(v))) { s.county = variants[0].slice(0, 2); break; }
       }
     } else {
       const ISO = {'JP':'日本','KR':'韓國','HK':'香港','SG':'新加坡','TH':'泰國','VN':'越南','US':'美國','GB':'英國','FR':'法國','IT':'義大利','DE':'德國','ES':'西班牙','AU':'澳洲','CA':'加拿大','TW':'台灣','CN':'中國','MO':'澳門','NL':'荷蘭','BE':'比利時','CH':'瑞士','AT':'奧地利','PT':'葡萄牙','GR':'希臘','CZ':'捷克','HU':'匈牙利','PL':'波蘭','SE':'瑞典','NO':'挪威','DK':'丹麥','FI':'芬蘭','NZ':'紐西蘭','MY':'馬來西亞','ID':'印尼','PH':'菲律賓','IN':'印度','AE':'阿聯酋','TR':'土耳其','MX':'墨西哥','BR':'巴西','AR':'阿根廷'};
@@ -1956,9 +1980,10 @@ async function handleDetailPhotoUpload(e) {
   detailFocalX = 0.5; detailFocalY = 0.5;
   const img = document.getElementById('detailNewFocalImg');
   if (img) img.src = data;
-  updateFocalDot('detailNewFocalDot', 0.5, 0.5);
+  const newImg = document.getElementById('detailNewFocalImg');
+  if (newImg) newImg.style.objectPosition = '50% 50%';
   document.getElementById('detailUploadPreview').style.display = 'block';
-  setupFocalDrag('detailNewFocalOverlay', 'detailNewFocalDot', (x, y) => { detailFocalX = x; detailFocalY = y; });
+  setupFocalDrag('detailNewFocalImg', (x, y) => { detailFocalX = x; detailFocalY = y; });
   e.target.value = '';
 }
 
@@ -2168,7 +2193,7 @@ async function selectSearchResult(i) {
       ['金門縣'],['連江縣']
     ];
     for (const variants of countyMap) {
-      if (variants.some(v => addr.includes(v))) { county = variants[0]; break; }
+      if (variants.some(v => addr.includes(v))) { county = variants[0].slice(0, 2); break; }
     }
   } else {
     // 國外：優先使用 addressComponents（ISO 國碼最可靠），fallback 到文字比對
