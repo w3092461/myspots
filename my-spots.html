@@ -1516,8 +1516,9 @@ function makeCard(s) {
     <div class="card-body">
       <div class="card-name">${s.name}</div>
       ${ratingHtml}
-      ${s.address ? `<div class="card-addr">${s.address}</div>` : ''}
-      ${region === 'abroad' && (s.county || s.city) ? `<div class="card-loc">${[s.county, s.city].filter(Boolean).join(' · ')}</div>` : ''}
+      ${region === 'abroad' && (s.county || s.city)
+        ? `<div class="card-addr">${[s.county, s.city].filter(Boolean).join(' · ')}</div>`
+        : s.address ? `<div class="card-addr">${s.address}</div>` : ''}
       ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
       ${tripTagsHtml}
     </div>
