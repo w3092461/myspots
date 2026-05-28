@@ -2030,18 +2030,21 @@ async function repairMissingPhotos() {
   const key = getKey();
   if (!key) { openSettings(); return; }
 
-  // Find spots with broken IDB references (photoData=idb but no data in IDB and no fallback URL)
-  const allSpots = [...(JSON.parse(localStorage.getItem('myspots_v4')||'[]')),
-                    ...(JSON.parse(localStorage.getItem('myspots_abroad')||'[]'))];
   const broken = [];
   for (const s of spots) {
-    if (s.photoData === 'idb' && !s.photoUrl) {
+    // IDB reference but data is gone
+    if (s.photoData === 'idb') {
       const data = await idbGetPhoto(s.id);
-      if (!data) broken.push(s);
+      if (!data) { broken.push(s); continue; }
+    }
+    // URL-only spots — Google Places photo URLs can expire
+    if (!s.photoData && s.photoUrl && s.photoUrl.includes('places.googleapis.com')) {
+      broken.push(s);
     }
   }
 
   if (!broken.length) { alert('沒有需要修復的地點 ✅'); return; }
+  if (!confirm(`找到 ${broken.length} 個地點需要重新取得照片，可能需要數分鐘，確定開始？`)) return;
 
   const btn = document.getElementById('repairPhotoBtn');
   if (btn) { btn.disabled = true; btn.textContent = `修復中 0/${broken.length}...`; }
