@@ -455,6 +455,10 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
       </div>
     </div>
 
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+      <button id="repairPhotoBtn" class="btn-main" style="width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--border2)" onclick="repairMissingPhotos()">🔧 修復遺失照片</button>
+      <div class="setup-note" style="margin-top:8px">自動用 Google Places 重新搜尋並補回遺失的照片</div>
+    </div>
     <div class="setup-note">個人使用每月免費 10,000 次<br>點選外側區域可關閉設定</div>
   </div>
 </div>
@@ -2005,7 +2009,7 @@ async function saveDetail(id) {
   if (detailCustomPhoto) {
     await idbSavePhoto(s.id, detailCustomPhoto);
     s.photoData = 'idb';
-    s.photoUrl = null;
+    // keep photoUrl as fallback if IDB is ever cleared
     s.focalX = detailFocalX;
     s.focalY = detailFocalY;
     detailCustomPhoto = null;
@@ -2020,6 +2024,57 @@ async function saveDetail(id) {
   }
   renderMain();
   closeOverlay('detailOverlay');
+}
+
+async function repairMissingPhotos() {
+  const key = getKey();
+  if (!key) { openSettings(); return; }
+
+  // Find spots with broken IDB references (photoData=idb but no data in IDB and no fallback URL)
+  const allSpots = [...(JSON.parse(localStorage.getItem('myspots_v4')||'[]')),
+                    ...(JSON.parse(localStorage.getItem('myspots_abroad')||'[]'))];
+  const broken = [];
+  for (const s of spots) {
+    if (s.photoData === 'idb' && !s.photoUrl) {
+      const data = await idbGetPhoto(s.id);
+      if (!data) broken.push(s);
+    }
+  }
+
+  if (!broken.length) { alert('沒有需要修復的地點 ✅'); return; }
+
+  const btn = document.getElementById('repairPhotoBtn');
+  if (btn) { btn.disabled = true; btn.textContent = `修復中 0/${broken.length}...`; }
+
+  let fixed = 0, failed = 0;
+  for (let i = 0; i < broken.length; i++) {
+    const s = broken[i];
+    if (btn) btn.textContent = `修復中 ${i+1}/${broken.length}...`;
+    try {
+      const body = { textQuery: s.name, languageCode: 'zh-TW', pageSize: 1 };
+      const coordMatch = s.mapsUrl?.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (coordMatch) body.locationBias = { circle: { center: { latitude: parseFloat(coordMatch[1]), longitude: parseFloat(coordMatch[2]) }, radius: 300 } };
+      const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.photos' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) { failed++; continue; }
+      const data = await res.json();
+      const photo = data.places?.[0]?.photos?.[0];
+      if (photo) {
+        s.photoUrl = `https://places.googleapis.com/v1/${photo.name}/media?maxHeightPx=400&maxWidthPx=600&key=${key}`;
+        s.photoData = null;
+        fixed++;
+      } else { failed++; }
+    } catch(e) { failed++; }
+    await new Promise(r => setTimeout(r, 100)); // avoid rate limit
+  }
+
+  save();
+  renderMain();
+  if (btn) { btn.disabled = false; btn.textContent = '🔧 修復遺失照片'; }
+  alert(`修復完成：${fixed} 個找回照片${failed ? `，${failed} 個找不到` : ''} ✅`);
 }
 
 async function enrichSpot(id) {
@@ -2472,7 +2527,7 @@ async function confirmAdd() {
   if (pendingCustomPhoto) {
     await idbSavePhoto(spot.id, pendingCustomPhoto);
     spot.photoData = 'idb';
-    spot.photoUrl = null;
+    // keep photoUrl as fallback if IDB is ever cleared
     spot.focalX = pendingFocalX;
     spot.focalY = pendingFocalY;
   }
