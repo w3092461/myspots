@@ -1608,7 +1608,7 @@ function makeCard(s) {
       ${region === 'abroad' && (s.county || s.city)
         ? `<div class="card-addr">${[s.county, s.city].filter(Boolean).join(' · ')}</div>`
         : s.address ? `<div class="card-addr">${s.address}</div>` : ''}
-      ${(s.note || tripTagsHtml) ? `<div style="margin-top:4px">${s.note ? `<div class="card-note">${s.note}</div>` : ''}${tripTagsHtml}</div>` : ''}
+      ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
     </div>
     <div class="card-footer">
       <button class="card-icon-btn${s.favourited ? ' heart-on' : ''}" onclick="event.stopPropagation();toggleFav('${s.id}')">
@@ -1619,10 +1619,6 @@ function makeCard(s) {
         <svg width="18" height="18" viewBox="0 0 24 24"><polyline class="ick" points="20 6 9 17 4 12"/></svg>
       </button>
       <div class="card-icon-divider"></div>
-      <a class="card-icon-btn maps-btn" href="${mapsUrl}" target="_blank" onclick="event.stopPropagation()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285F4"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>
-      </a>
-      <div class="card-icon-divider"></div>
       ${s.sourceUrl
         ? `<a class="card-icon-btn link-on" href="${s.sourceUrl}" target="_blank" onclick="event.stopPropagation()" title="查看貼文">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -1630,6 +1626,10 @@ function makeCard(s) {
         : `<span class="card-icon-btn link-off">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
            </span>`}
+      <div class="card-icon-divider"></div>
+      <a class="card-icon-btn maps-btn" href="${mapsUrl}" target="_blank" onclick="event.stopPropagation()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285F4"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>
+      </a>
     </div>`;
 
   card.onclick = () => openDetail(s.id);
@@ -1637,9 +1637,17 @@ function makeCard(s) {
     idbGetPhoto(s.id).then(data => {
       const img = card.querySelector('.card-img');
       if (!img) return;
-      if (data) { img.style.display = ''; img.src = data; return; }
-      if (s.photoUrl) { img.onerror = () => { img.style.display = 'none'; }; img.src = s.photoUrl; }
-      else img.style.display = 'none';
+      if (data) { img.src = data; return; }
+      if (s.photoUrl) { img.onerror = () => img.style.display = 'none'; img.src = s.photoUrl; return; }
+      // IDB data lost — show placeholder instead of blank space
+      img.style.display = 'none';
+      const wrap = card.querySelector('.card-img-wrap');
+      if (wrap && !wrap.querySelector('.card-ph')) {
+        const ph = document.createElement('div');
+        ph.className = 'card-ph';
+        ph.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A8B8C4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+        wrap.appendChild(ph);
+      }
     });
   }
   card.addEventListener('dragstart', e => { dragSrcId = s.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
