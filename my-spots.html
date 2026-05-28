@@ -115,7 +115,7 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .card-fav-btn.active svg { fill: var(--color-heart); }
 
 /* Card body */
-.card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; min-height: 0; }
+.card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
 .card-name { font-size: 16px; font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
 .card-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; min-height: 24px; }
 .card-rating-score { font-size: 13px; font-weight: 700; color: var(--color-text); }
@@ -128,6 +128,9 @@ body { font-family: 'DM Sans', 'Noto Sans TC', sans-serif; background: var(--col
 .card-icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; text-decoration: none; flex-shrink: 0; }
 .card-icon-btn:hover { background: var(--color-bg); }
 .card-icon-btn.maps-btn:hover { background: #E8F0FE; }
+.card-icon-btn.link-on { color: var(--color-primary); }
+.card-icon-btn.link-on:hover { background: rgba(61,170,140,0.1); }
+.link-off { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.2; cursor: default; }
 .card-icon-divider { width: 1px; height: 20px; background: var(--color-border); }
 
 /* Footer icon states */
@@ -1588,7 +1591,7 @@ function makeCard(s) {
     ? 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
     : (s.photoData || s.photoUrl || '');
   const photoHtml = (s.photoData || s.photoUrl)
-    ? `<img class="card-img" src="${_photoSrc}" loading="lazy" ${_isIDB ? '' : "onerror=\"this.style.display='none'\""} style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">`
+    ? `<img class="card-img" src="${_photoSrc}" ${_isIDB ? '' : 'loading="lazy"'} ${_isIDB ? '' : "onerror=\"this.style.display='none'\""} style="object-position:${((s.focalX??0.5)*100).toFixed(0)}% ${((s.focalY??0.5)*100).toFixed(0)}%">`
     : `<div class="card-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A8B8C4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>`;
 
   card.innerHTML = `
@@ -1605,8 +1608,7 @@ function makeCard(s) {
       ${region === 'abroad' && (s.county || s.city)
         ? `<div class="card-addr">${[s.county, s.city].filter(Boolean).join(' · ')}</div>`
         : s.address ? `<div class="card-addr">${s.address}</div>` : ''}
-      ${s.note ? `<div class="card-note">${s.note}</div>` : ''}
-      ${tripTagsHtml}
+      ${(s.note || tripTagsHtml) ? `<div style="margin-top:4px">${s.note ? `<div class="card-note">${s.note}</div>` : ''}${tripTagsHtml}</div>` : ''}
     </div>
     <div class="card-footer">
       <button class="card-icon-btn${s.favourited ? ' heart-on' : ''}" onclick="event.stopPropagation();toggleFav('${s.id}')">
@@ -1620,11 +1622,14 @@ function makeCard(s) {
       <a class="card-icon-btn maps-btn" href="${mapsUrl}" target="_blank" onclick="event.stopPropagation()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285F4"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>
       </a>
-      ${s.sourceUrl ? `
       <div class="card-icon-divider"></div>
-      <a class="card-icon-btn" href="${s.sourceUrl}" target="_blank" onclick="event.stopPropagation()" title="查看貼文">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-      </a>` : ''}
+      ${s.sourceUrl
+        ? `<a class="card-icon-btn link-on" href="${s.sourceUrl}" target="_blank" onclick="event.stopPropagation()" title="查看貼文">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+           </a>`
+        : `<span class="card-icon-btn link-off">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+           </span>`}
     </div>`;
 
   card.onclick = () => openDetail(s.id);
