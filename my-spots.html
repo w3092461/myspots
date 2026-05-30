@@ -1239,7 +1239,7 @@ function doExportKml() {
   const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const placemarks = list.map(s => {
     const coord = (s.lat && s.lng) ? `<Point><coordinates>${s.lng},${s.lat},0</coordinates></Point>` : '';
-    const desc = [s.address, s.rating ? `評分 ${s.rating}` : '', s.note].filter(Boolean).join(' | ');
+    const desc = [s.address, s.rating ? `評分 ${s.rating}` : '', s.note, s.mapsUrl ? `Google Maps: ${s.mapsUrl}` : ''].filter(Boolean).join(' | ');
     return `  <Placemark>\n    <name>${esc(s.name)}</name>\n    <description>${esc(desc)}</description>\n    ${coord}\n  </Placemark>`;
   }).join('\n');
 
@@ -2493,7 +2493,7 @@ async function selectSearchResult(i) {
   if (autoCat) { addSelectedCats = [autoCat]; renderAddCats(); }
 
   setAddProgress(100, '✓ 確認後加入收藏');
-  pendingSpot = { id: Date.now().toString(), name: place.displayName?.text || '', address: addr, county, rating: place.rating || null, mapsUrl: place.googleMapsUri || '', photoUrl, lat: place.location?.latitude ?? null, lng: place.location?.longitude ?? null, createdAt: new Date().toISOString() };
+  pendingSpot = { id: Date.now().toString(), name: place.displayName?.text || '', address: addr, county, rating: place.rating || null, mapsUrl: place.googleMapsUri || '', placeId: place.id || '', photoUrl, lat: place.location?.latitude ?? null, lng: place.location?.longitude ?? null, createdAt: new Date().toISOString() };
 
   const tw = document.getElementById('addThumbWrap');
   tw.innerHTML = photoUrl ? `<img class="result-thumb" src="${photoUrl}" onerror="this.style.display='none'">` :
